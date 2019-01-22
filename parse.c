@@ -65,7 +65,7 @@ static Node *term() {
         if (GET_TK(tokens, pos + 1)->ty == '(') {
             // function
             Node *node = malloc(sizeof(Node));
-            node->ty = ND_CALL;
+            node->ty = ND_FUNC_CALL;
             node->name = GET_TK(tokens, pos)->name;
             node->args = new_vector();
             pos += 2;
@@ -157,7 +157,7 @@ static Node *stmt() {
             return node;
         }
         else if (consume(TK_RETURN)) {
-            node = new_node(TK_RETURN, NULL, add());
+            node = new_node(TK_RETURN, NULL, equality());
             expect(';');
             return node;
         }
@@ -169,12 +169,46 @@ static Node *stmt() {
 }
 
 
+static Node *cmpd_stmt() {
+    Node *node = malloc(sizeof(Node));
+    node->ty = ND_CMPD_STMT;
+    node->stmts = new_vector();
+
+    while (GET_TK(tokens, pos)->ty != '}')
+        vec_push(node->stmts, stmt());
+    return node;
+}
+
+
+static Node *function() {
+    Node *node = malloc(sizeof(Node));
+    node->ty = ND_FUNC_DEF;
+    node->args = new_vector();
+
+    if (GET_TK(tokens, pos)->ty != TK_IDENT)
+        error("function() : Name expected, but got %s\n", GET_TK(tokens, pos)->input);
+    node->name = GET_TK(tokens, pos)->name;
+    pos++;
+
+    expect('(');
+    while (GET_TK(tokens, pos)->ty != (')'))
+        vec_push(node->args, term());
+    expect(')');
+
+    expect('{');
+    node->body = cmpd_stmt();
+    expect('}');
+
+    return node;
+}
+
+
 Vector *parse(Vector *tk) {
     tokens = tk;
 
     Vector *v = new_vector();
 
     while (GET_TK(tokens, pos)->ty != TK_EOF)
-        vec_push(v, stmt());
+        vec_push(v, function());
     return v;
 }

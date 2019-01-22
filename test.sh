@@ -18,24 +18,24 @@ try() {
 
 echo 'int plus(int x, int y){ return x + y; }' | gcc -S -xc -c -o tmp-plus.s -
 
-try 0 0
-try 42 42
-try 21 '5+20-4'
-try 41 " 12 + 34 - 5 "
-try 47 "5+6*7"
-try 15 "5*(9 - 6)"
-try 4 "(3+5)/2"
+try 21 'main() { 5+20-4;}'
+try 41 "main() {12 + 34 - 5;}"
+try 47 "main() {5+6*7;}"
+try 15 "main() {5*(9 - 6);}"
+try 4 "main() {(3+5)/2;}"
 
-try 21 "1+2; 5+20-4;"
-try 3 "a=3;a;"
-try 14 "a=3;b=5*6-8;a+b/2;"
-try 4 "a=b=2;a+b;"
-try 0 "1==2;"
-try 4 "a=b=c=1==1;a+b+c+1;"
-try 0 "1!=1;"
-try 5 "a=(1==1)+(1!=1)*2+(0!=2)*4+(4!=4);a;"
-try 2 "a_2 = 1; a_2+1;"
+try 21 "main() {1+2; 5+20-4;}"
+try 3 "main() {a=3;a;}"
+try 14 "main() {a=3;b=5*6-8;a+b/2;}"
+try 4 "main() {a=b=2;a+b;}"
+try 0 "main() {1==2;}"
+try 4 "main() {a=b=c=1==1;a+b+c+1;}"
+try 0 "main() {1!=1;}"
+try 5 "main() {a=(1==1)+(1!=1)*2+(0!=2)*4+(4!=4);a;}"
+try 2 "main() {a_2 = 1; a_2+1;}"
 
-try 2 "a_2=1; return a_2+1;"
+try 2 "main() {a_2=1; return a_2+1;}"
+try 7 "main() {return plus(2, 5);}"
 
-try 7 "return plus(2, 5);"
+try 2 "one() { return 1+(2==2); } main() { return one(); }"
+try 0 "one() { return 1+2==2; } main() { return one(); }"

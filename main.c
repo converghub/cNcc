@@ -1,8 +1,5 @@
 #include "ccc.h"
 
-
-Node *code[100];
-
 int main(int argc, char** argv) {
     if (argc == 2 && !strcmp(argv[1], "-test")) {
         run_test();
@@ -14,29 +11,12 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    // tokenizeする
+    // tokenize
     Vector *tokens = tokenize(argv[1]);
     Vector *code = parse(tokens);
 
-    // assembly 前半
-    printf(".intel_syntax noprefix\n");
-    printf(".global main\n");
-    printf("main:\n");
-
-    // プロローグ
-    // 変数26個分の領域確保
-    // TO DO: 汎用性向上
-    printf("    push rbp\n");
-    printf("    mov rbp, rsp\n");
-    printf("    sub rsp, 208\n");
-
+    // gen code
     gen_code(code);
-
-    // エピローグ
-    // 最期の結果がraxに残っているのでそれが返り値
-    printf("    mov rsp, rbp\n");
-    printf("    pop rbp\n");
-    printf("    ret\n");
 
     return 0;
 } 

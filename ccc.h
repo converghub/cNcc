@@ -46,7 +46,9 @@ enum {
     ND_NUM = 256,   // Integer
     ND_RETURN,      // Return
     ND_IDENT,       // Identifier
-    ND_CALL,        // Function call
+    ND_CMPD_STMT,   // Compound statement
+    ND_FUNC_CALL,   // Function call
+    ND_FUNC_DEF,    // Function definition
     ND_EQ,          // Equal operation : ==
     ND_NE,          // Not-equal operation : !=
 };
@@ -58,6 +60,7 @@ typedef struct Node {
     int val;             // for ND_NUM
     char *name;          // for ND_IDENT
     struct Node *expr;   // for ND_RETURN
+    Vector *stmts;       // for ND_CMPD_STMT
 
     // Function
     Vector *args;        // for Function call arguments
@@ -67,7 +70,7 @@ typedef struct Node {
 
 
 // parse.c
-void program(Node *code[], Vector *tokens);
+Vector *parse(Vector *tk);
 
 // token.c
 Vector *tokenize(char *p);

@@ -22,6 +22,30 @@ static void gen_lval(Node *node) {
 }
 
 void gen(Node *node) {
+    if (node->ty == ND_FUNC_DEF) {
+        printf(".global %s\n", node->name);
+        printf("%s:\n", node->name);
+        // プロローグ
+        // 変数26個分の領域確保
+        // TO DO: 汎用性向上
+        printf("    push rbp\n");
+        printf("    mov rbp, rsp\n");
+        printf("    sub rsp, 208\n");
+
+        for (int i = 0; i < node->body->stmts->len; i++)
+            gen(node->body->stmts->data[i]);
+
+        // スタックに一つの値が残っているはずなので溢れないようにpop
+        printf("    pop rax\n");
+        // エピローグ
+        // 最期の結果がraxに残っているのでそれが返り値
+        printf("    mov rsp, rbp\n");
+        printf("    pop rbp\n");
+        printf("    ret\n");
+        return;
+    }
+
+
     if (node->ty == ND_NUM) {
         printf("    push %d\n", node->val);
         return;
@@ -36,7 +60,7 @@ void gen(Node *node) {
     }
 
 
-    if (node->ty == ND_CALL) {
+    if (node->ty == ND_FUNC_CALL) {
         char *args[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
         for (int i = 0; node->args->data[i]; i++)
@@ -100,13 +124,14 @@ void gen(Node *node) {
 }
 
 void gen_code(Vector *code) {
+    printf(".intel_syntax noprefix\n");
+
     vars = new_map();
     bpoff = 0;
 
     // 先頭からコード生成
     for (int i = 0; i < code->len; i++) {
         gen(code->data[i]);
-        // スタックに一つの値が残っているはずなので溢れないようにpop
-        printf("    pop rax\n");
     }
+
 }
