@@ -59,7 +59,9 @@ typedef struct Node {
     char *name;          // for ND_IDENT
     struct Node *expr;   // for ND_RETURN
 
-    Vector *args;        // for Function Call
+    // Function
+    Vector *args;        // for Function call arguments
+    struct Node *body;   // for Function defenition
 } Node;
 
 
@@ -83,4 +85,4 @@ bool map_exist(Map *map, char *key);
 
 // codegen.c
 void gen(Node *node);
-void gen_code(Node *node[]);
+void gen_code(Vector *code);

@@ -153,13 +153,12 @@ static Node *stmt() {
     for (;;) {
         if (GET_TK(tokens, pos)->ty == TK_EOF)
             return node;
-        else if (GET_TK(tokens, pos)->ty == ';') {
-            pos++;
+        else if (consume(';')) {
             return node;
         }
-        else if (GET_TK(tokens, pos)->ty == TK_RETURN) {
-            pos++;
+        else if (consume(TK_RETURN)) {
             node = new_node(TK_RETURN, NULL, add());
+            expect(';');
             return node;
         }
     }
@@ -170,12 +169,12 @@ static Node *stmt() {
 }
 
 
-void program(Node *code[], Vector *tk) {
-    int i = 0;
+Vector *parse(Vector *tk) {
     tokens = tk;
 
+    Vector *v = new_vector();
+
     while (GET_TK(tokens, pos)->ty != TK_EOF)
-        code[i++] = stmt();
-    // NULL for End of Node
-    code[i] = NULL;
+        vec_push(v, stmt());
+    return v;
 }

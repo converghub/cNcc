@@ -99,14 +99,13 @@ void gen(Node *node) {
     printf("    push rax\n");
 }
 
-void gen_code(Node *code[]) {
+void gen_code(Vector *code) {
     vars = new_map();
     bpoff = 0;
 
     // 先頭からコード生成
-    for (int i = 0; i < 99; i++) {
-        if (code[i] == NULL) break;
-        gen(code[i]);
+    for (int i = 0; i < code->len; i++) {
+        gen(code->data[i]);
         // スタックに一つの値が残っているはずなので溢れないようにpop
         printf("    pop rax\n");
     }

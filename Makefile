@@ -12,4 +12,4 @@ test: ccc
 	./test.sh
 
 clean:
-	rm -f ccc *.o *~ tmp tmp.s
+	rm -f ccc *.o *~ tmp*

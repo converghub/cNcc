@@ -16,9 +16,7 @@ int main(int argc, char** argv) {
 
     // tokenizeする
     Vector *tokens = tokenize(argv[1]);
-//    for (int i = 0; tokens->data[i]; i++)
-//        printf("tokens->data[%d])->input: %s\n", i, ((Token *)tokens->data[i])->input);
-    program(code, tokens);
+    Vector *code = parse(tokens);
 
     // assembly 前半
     printf(".intel_syntax noprefix\n");
