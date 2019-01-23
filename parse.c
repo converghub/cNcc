@@ -195,7 +195,11 @@ static Node *function() {
     expect('(');
     while (GET_TK(tokens, pos)->ty != (')')) {
         vec_push(node->args, term());
-        if (consume(',')) continue;
+        if (consume(',')) {
+            if (GET_TK(tokens, pos)->ty == (')'))
+                error("function() ','が不適切な場所にあります\n") ;           
+            continue;
+        }
     }
     expect(')');
 
