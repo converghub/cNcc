@@ -39,3 +39,6 @@ try 7 "main() {return plus(2, 5);}"
 
 try 2 "one() { return 1+(2==2); } main() { return one(); }"
 try 0 "one() { return 1+2==2; } main() { return one(); }"
+
+try 3 "one(x) { return x+2; } main() {return one(1);}"
+try 6 'one(x) { return x*2; } two(y) { return 2+y; } main() { return one(1)+two(2); }'

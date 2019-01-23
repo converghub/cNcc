@@ -3,6 +3,7 @@
 
 static Map *vars;
 static int bpoff;
+static char *args[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
 // gen
 static void gen_lval(Node *node) {
@@ -25,20 +26,28 @@ void gen(Node *node) {
     if (node->ty == ND_FUNC_DEF) {
         printf(".global %s\n", node->name);
         printf("%s:\n", node->name);
-        // プロローグ
-        // 変数26個分の領域確保
-        // TO DO: 汎用性向上
+        // Prologue.
         printf("    push rbp\n");
         printf("    mov rbp, rsp\n");
+
+        // 関数内の変数領域確保
         printf("    sub rsp, 208\n");
 
-        for (int i = 0; i < node->body->stmts->len; i++)
-            gen(node->body->stmts->data[i]);
+        // Arity
+        for (int j = 0; j < node->args->len; j++) {
+            gen_lval(node->args->data[j]);
+            printf("    pop rax\n");
+            printf("    mov [rax], %s\n", args[j]);
+        }
 
-        // スタックに一つの値が残っているはずなので溢れないようにpop
+        // Body
+        for (int i = 0; i < node->body->stmts->len; i++) {
+             gen(node->body->stmts->data[i]);
+        }
+
+        // pop this value so the stack in not overflown
         printf("    pop rax\n");
-        // エピローグ
-        // 最期の結果がraxに残っているのでそれが返り値
+        // Epilogue
         printf("    mov rsp, rbp\n");
         printf("    pop rbp\n");
         printf("    ret\n");
@@ -61,9 +70,7 @@ void gen(Node *node) {
 
 
     if (node->ty == ND_FUNC_CALL) {
-        char *args[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
-
-        for (int i = 0; node->args->data[i]; i++)
+        for (int i = 0; i < node->args->len; i++)
             printf("    mov %s, %d\n", args[i], ((Node *)(node->args->data[i]))->val);
  
         printf("    call %s\n", node->name);
@@ -127,7 +134,7 @@ void gen_code(Vector *code) {
     printf(".intel_syntax noprefix\n");
 
     vars = new_map();
-    bpoff = 0;
+    bpoff = 8;
 
     // 先頭からコード生成
     for (int i = 0; i < code->len; i++) {
