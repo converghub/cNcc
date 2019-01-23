@@ -87,11 +87,11 @@ static Node *term() {
 
     if (GET_TK(tokens, pos)->ty == TK_RETURN || GET_TK(tokens, pos)->ty == ';') {
         if (strchr("=", *GET_TK(tokens, pos)->input)) 
-            error("'='が不適切な場所に含まれています\n");        
+            error("term() '='が不適切な場所に含まれています\n");        
         return NULL;
     }    
 
-    error("不適切なトークンです: %s", GET_TK(tokens, pos)->input);
+    error("term() 不適切なトークンです: %s", GET_TK(tokens, pos)->input);
 
     return NULL;
 }
@@ -161,10 +161,12 @@ static Node *stmt() {
             expect(';');
             return node;
         }
+        else
+            error("stmt() 不適切なトークンです: %s", GET_TK(tokens, pos)->input);
     }
 
     if (!consume(';'))
-        error("';'ではないトークンです: %s", GET_TK(tokens, pos)->input); 
+        error("stmt() ';'ではないトークンです: %s", GET_TK(tokens, pos)->input); 
     
 }
 
@@ -191,8 +193,10 @@ static Node *function() {
     pos++;
 
     expect('(');
-    while (GET_TK(tokens, pos)->ty != (')'))
+    while (GET_TK(tokens, pos)->ty != (')')) {
         vec_push(node->args, term());
+        if (consume(',')) continue;
+    }
     expect(')');
 
     expect('{');
