@@ -46,6 +46,7 @@ static Node *new_node_ident(char *name) {
 
 
 static Node *assign();
+static Node *stmt();
 
 
 static Node *term() {
@@ -91,8 +92,19 @@ static Node *term() {
         return NULL;
     }    
 
-    error("term() 不適切なトークンです: %s", GET_TK(tokens, pos)->input);
+    if (GET_TK(tokens, pos)->ty == TK_IF) {
+        Node *node = malloc(sizeof(Node));
+        node->ty = ND_IF;
+        pos++;
+        expect('(');
+        node->bl_expr = assign();
+        expect(')');
+        node->tr_stmt = stmt();
+        pos--;
+        return node;
+    }
 
+    error("term() 不適切なトークンです: %s", GET_TK(tokens, pos)->input);
     return NULL;
 }
 
@@ -149,6 +161,8 @@ static Node *assign() {
 
 static Node *stmt() {
     Node *node = assign();
+    if (GET_TK(tokens, pos)->ty == '}')
+        return node;
 
     for (;;) {
         if (GET_TK(tokens, pos)->ty == TK_EOF)

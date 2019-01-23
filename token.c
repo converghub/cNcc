@@ -24,6 +24,7 @@ static struct {
 // pが指している文字列をトークンに分割してtokensに保存する
 Vector *tokenize(char *p) {
     keywords = new_map();
+    map_put(keywords, "if", (void *)TK_IF);
     map_put(keywords, "return", (void *)TK_RETURN);
 
 

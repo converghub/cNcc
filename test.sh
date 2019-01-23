@@ -44,3 +44,6 @@ try 3 "one(x) { return x+2; } main() {return one(1);}"
 try 6 'one(x) { return x*2; } two(y) { return 2+y; } main() { return one(1)+two(2); }'
 try 6 'mul(a, b) { return a * b; } main() { return mul(2, 3); }'
 try 21 'add(a,b,c,d,e,f) { return a+b+c+d+e+f; } main() { return add(1,2,3,4,5,6); }'
+
+try 2 'main() { if (1) return 2; return 3; }'
+try 3 'main() { if (0) return 2; return 3; }'

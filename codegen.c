@@ -22,7 +22,10 @@ static void gen_lval(Node *node) {
     printf("    push rax\n");
 }
 
-void gen(Node *node) {
+void gen(Node *node, ...) {
+    va_list parent_func;
+    va_start(parent_func, node);
+
     if (node->ty == ND_FUNC_DEF) {
         printf(".global %s\n", node->name);
         printf("%s:\n", node->name);
@@ -42,18 +45,30 @@ void gen(Node *node) {
 
         // Body
         for (int i = 0; i < node->body->stmts->len; i++) {
-             gen(node->body->stmts->data[i]);
+            gen(node->body->stmts->data[i], node);
         }
 
+        // Epilogue
+        printf("%s_end:\n", node->name);
         // pop this value so the stack in not overflown
         printf("    pop rax\n");
-        // Epilogue
         printf("    mov rsp, rbp\n");
         printf("    pop rbp\n");
         printf("    ret\n");
         return;
     }
 
+    if (node->ty == ND_IF) {
+        gen(node->bl_expr);
+
+        printf("    pop rax\n");
+        printf("    cmp rax, 0\n");
+        printf("    je .Lend\n");
+
+        gen(node->tr_stmt, va_arg(parent_func, Node*));
+        printf(".Lend:\n");
+        return;
+    }
 
     if (node->ty == ND_NUM) {
         printf("    push %d\n", node->val);
@@ -93,6 +108,7 @@ void gen(Node *node) {
     if (node->ty == ND_RETURN) {
         // TODO : ND_RETURNの実装、関数の場合
         gen(node->rhs);
+        printf("    jmp %s_end\n", va_arg(parent_func, Node*)->name);
         return;
     }
 
