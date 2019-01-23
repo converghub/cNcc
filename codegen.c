@@ -4,6 +4,7 @@
 static Map *vars;
 static int bpoff;
 static char *args[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+static int label_counter = 0;
 
 // gen
 static void gen_lval(Node *node) {
@@ -49,7 +50,7 @@ void gen(Node *node, ...) {
         }
 
         // Epilogue
-        printf("%s_end:\n", node->name);
+        printf(".%s_end:\n", node->name);
         // pop this value so the stack in not overflown
         printf("    pop rax\n");
         printf("    mov rsp, rbp\n");
@@ -63,10 +64,11 @@ void gen(Node *node, ...) {
 
         printf("    pop rax\n");
         printf("    cmp rax, 0\n");
-        printf("    je .Lend\n");
+        int ifend_label = label_counter++;
+        printf("    je .if_end_%d\n", ifend_label);
 
         gen(node->tr_stmt, va_arg(parent_func, Node*));
-        printf(".Lend:\n");
+        printf(".if_end_%d:\n", ifend_label);
         return;
     }
 
@@ -106,9 +108,8 @@ void gen(Node *node, ...) {
     }
 
     if (node->ty == ND_RETURN) {
-        // TODO : ND_RETURNの実装、関数の場合
         gen(node->rhs);
-        printf("    jmp %s_end\n", va_arg(parent_func, Node*)->name);
+        printf("    jmp .%s_end\n", va_arg(parent_func, Node*)->name);
         return;
     }
 
