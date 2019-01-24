@@ -147,8 +147,33 @@ static Node *equality() {
     }
 }
 
-static Node *assign() {
+
+static Node *land() {
     Node *node = equality();
+
+    for (;;) {
+        if (consume(TK_LAND))
+            node = new_node(ND_LAND, node, land());
+        else
+            return node;        
+    }
+}
+
+
+static Node *lor() {
+    Node *node = land();
+
+    for (;;) {
+        if (consume(TK_LOR))
+            node = new_node(ND_LOR, node, lor());
+        else
+            return node;
+    }
+}
+
+
+static Node *assign() {
+    Node *node = lor();
 
     if (consume('='))
         return new_node('=', node, assign());
@@ -184,7 +209,7 @@ static Node *stmt() {
         }
         return node;
     } else if (consume(TK_RETURN)) {
-        node = new_node(TK_RETURN, NULL, equality());
+        node = new_node(TK_RETURN, NULL, lor());
         expect(';');
         return node;
     } else if (consume(TK_WHILE)) {

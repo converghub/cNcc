@@ -32,8 +32,10 @@ enum {
     TK_ELSE,        // else
     TK_WHILE,       // while
     TK_FOR,         // for
-    TK_EQ,          // Equal : ==
-    TK_NE,          // Not-equal : !=
+    TK_EQ,          // ==
+    TK_NE,          // !=
+    TK_LOR,         // ||
+    TK_LAND,        // &&
     TK_EOF,         // End of input
 };
 
@@ -58,6 +60,8 @@ enum {
     ND_FUNC_DEF,    // Function definition
     ND_EQ,          // Equal operation : ==
     ND_NE,          // Not-equal operation : !=
+    ND_LOR,         // Logical OR operation : ||
+    ND_LAND,        // Logical AND operation : &&
 };
 
 typedef struct Node {

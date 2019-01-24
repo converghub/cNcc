@@ -15,7 +15,7 @@ static struct {
     char *name;
     int ty;
 } symbols[] = {
-    {"==", TK_EQ}, {"!=", TK_NE}
+    {"==", TK_EQ}, {"!=", TK_NE}, {"&&", TK_LAND}, {"||", TK_LOR}
 };
 
 

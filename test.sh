@@ -63,3 +63,12 @@ try 11 'main(){a=1; while (a<11) {a=a+2;a=a-1;} return a;}'
 
 try 60 'main() { sum=0; for (i=10; i<15; i=i+1) sum = sum + i; return sum;}'
 try 60 'main() { sum=0; for (i=10; i<15; i=i+1) {sum = sum + i; sum = sum + 0;} return sum;}'
+
+try 1 "main(){(1 == 1) && (2 == 2);}"
+try 0 "main(){(1 == 1) && (2 == 0);}"
+try 0 "main(){(1 == 0) && (2 == 2);}"
+try 0 "main(){(1 == 0) && (2 == 4);}"
+try 1 "main(){(1 == 1) || (2 == 2);}"
+try 1 "main(){(1 == 1) || (2 == 0);}"
+try 1 "main(){(1 == 3) || (2 == 2);}"
+try 0 "main(){(1 == 3) || (2 == 0);}"
