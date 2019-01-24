@@ -119,14 +119,29 @@ static Node *add() {
     }
 }
 
-static Node *equality() {
+
+static Node *rel() {
     Node *node = add();
 
     for (;;) {
+        if (consume('<'))
+            node = new_node('<', node, add());
+        else if (consume('>'))
+            node = new_node('>', node, add());
+        else
+            return node;
+    }
+}
+
+
+static Node *equality() {
+    Node *node = rel();
+
+    for (;;) {
         if (consume(TK_EQ)) 
-            node = new_node(ND_EQ, node, add());
+            node = new_node(ND_EQ, node, rel());
         else if (consume(TK_NE))
-            node = new_node(ND_NE, node, add());
+            node = new_node(ND_NE, node, rel());
         else
             return node;
     }
