@@ -64,8 +64,8 @@ void gen(Node *node, ...) {
 
         printf("    pop rax\n");
         printf("    cmp rax, 0\n");
-        int ifend_label = label_counter++;
-        printf("    je .if_end_%d\n", ifend_label);
+        int else_label = label_counter++;
+        printf("    je .else_%d\n", else_label);
 
         if (node->tr_stmt->stmts != NULL) {
             for (int i = 0; i < node->tr_stmt->stmts->len; i++) 
@@ -74,7 +74,15 @@ void gen(Node *node, ...) {
             gen(node->tr_stmt, va_arg(parent_func, Node*));
         }
 
-        printf(".if_end_%d:\n", ifend_label);
+        printf(".else_%d:\n", else_label);
+        if (node->els_stmt != NULL) {
+            if (node->els_stmt->stmts != NULL) {
+                for (int i = 0; i < node->els_stmt->stmts->len; i++) 
+                gen(node->els_stmt->stmts->data[i], va_arg(parent_func, Node*));
+            } else {
+                gen(node->els_stmt, va_arg(parent_func, Node*));
+            }
+        }
         return;
     }
 

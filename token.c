@@ -25,6 +25,7 @@ static struct {
 Vector *tokenize(char *p) {
     keywords = new_map();
     map_put(keywords, "if", (void *)TK_IF);
+    map_put(keywords, "else", (void *)TK_ELSE);
     map_put(keywords, "return", (void *)TK_RETURN);
 
 

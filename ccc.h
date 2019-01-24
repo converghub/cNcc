@@ -29,6 +29,7 @@ enum {
     TK_RETURN,      // Return
     TK_IDENT,       // Identifier
     TK_IF,          // if
+    TK_ELSE,        // else
     TK_EQ,          // Equal : ==
     TK_NE,          // Not-equal : !=
     TK_EOF,         // End of input
@@ -71,6 +72,7 @@ typedef struct Node {
     // If
     struct Node *bl_expr;
     struct Node *tr_stmt;
+    struct Node *els_stmt;
 } Node;
 
 

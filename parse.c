@@ -147,17 +147,27 @@ static Node *stmt() {
 
     if (consume(TK_IF)) {
         node->ty = ND_IF;
+        // condition
         expect('(');
         node->bl_expr = assign();
         expect(')');
+        // if true statements
         if (consume('{')) {
             node->tr_stmt = cmpd_stmt();
             expect('}');
-            return node;
         } else {
             node->tr_stmt = stmt();
-            return node;
         }
+        // else statements
+        if (consume(TK_ELSE)) {
+            if (consume('{')) {
+                node->els_stmt = cmpd_stmt();
+                expect('}');
+            } else {
+                node->els_stmt = stmt();
+            }
+        }
+        return node;
     } else if (consume(TK_RETURN)) {
         node = new_node(TK_RETURN, NULL, equality());
         expect(';');
