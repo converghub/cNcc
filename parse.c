@@ -199,6 +199,22 @@ static Node *stmt() {
             node->body = stmt();
         }
         return node;
+    } else if (consume(TK_FOR)) {
+        node->ty = ND_FOR;
+        expect('(');
+        node->init = assign();
+        expect(';');
+        node->bl_expr = assign();
+        expect(';');
+        node->inc = assign();
+        expect(')');
+        if(consume('{')) {
+            node->body = cmpd_stmt();
+            expect('}');
+        } else {
+            node->body = stmt();
+        }
+        return node;
     } else {
         node = assign();
         expect(';');

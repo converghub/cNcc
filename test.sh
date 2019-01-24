@@ -60,3 +60,6 @@ try 0 'main() { return 0>0; }'
 
 try 11 'main(){a=1; while (a<11) a=a+1; return a;}'
 try 11 'main(){a=1; while (a<11) {a=a+2;a=a-1;} return a;}'
+
+try 60 'main() { sum=0; for (i=10; i<15; i=i+1) sum = sum + i; return sum;}'
+try 60 'main() { sum=0; for (i=10; i<15; i=i+1) {sum = sum + i; sum = sum + 0;} return sum;}'

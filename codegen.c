@@ -107,6 +107,31 @@ void gen(Node *node, ...) {
         return;
     }
 
+    if (node->ty == ND_FOR) {
+        int for_label = label_counter++;
+        int for_end = label_counter++;
+
+        gen(node->init);
+
+        printf(".for_%d:\n", for_label);
+        gen(node->bl_expr);
+        printf("    pop rax;\n");
+        printf("    cmp rax, 0\n");
+        printf("    je .for_end_%d\n", for_end);
+
+        if (node->body->stmts != NULL) {
+            for (int i = 0; i < node->body->stmts->len; i++)
+                gen(node->body->stmts->data[i], va_arg(parent_func, Node*));
+        } else {
+            gen(node->body);
+        }
+
+        gen(node->inc);
+        printf("    jmp .for_%d\n", for_label);
+        printf(".for_end_%d:\n", for_end);
+        return;
+    }
+
     if (node->ty == ND_NUM) {
         printf("    push %d\n", node->val);
         return;

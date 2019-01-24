@@ -31,6 +31,7 @@ enum {
     TK_IF,          // if
     TK_ELSE,        // else
     TK_WHILE,       // while
+    TK_FOR,         // for
     TK_EQ,          // Equal : ==
     TK_NE,          // Not-equal : !=
     TK_EOF,         // End of input
@@ -51,6 +52,7 @@ enum {
     ND_IDENT,       // Identifier
     ND_IF,          // If
     ND_WHILE,       // While
+    ND_FOR,         // For
     ND_CMPD_STMT,   // Compound statement
     ND_FUNC_CALL,   // Function call
     ND_FUNC_DEF,    // Function definition
@@ -70,6 +72,9 @@ typedef struct Node {
     // Function
     Vector *args;        // for Function call arguments
     struct Node *body;   // for Function defenition
+
+    struct Node *init;
+    struct Node *inc;
 
     // If
     struct Node *bl_expr;
