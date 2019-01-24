@@ -86,24 +86,6 @@ static Node *term() {
         return new_node_ident(GET_TK(tokens, pos++)->name);       
     }
 
-    if (GET_TK(tokens, pos)->ty == TK_RETURN || GET_TK(tokens, pos)->ty == ';') {
-        if (strchr("=", *GET_TK(tokens, pos)->input)) 
-            error("term() '='が不適切な場所に含まれています\n");        
-        return NULL;
-    }    
-
-    if (GET_TK(tokens, pos)->ty == TK_IF) {
-        Node *node = malloc(sizeof(Node));
-        node->ty = ND_IF;
-        pos++;
-        expect('(');
-        node->bl_expr = assign();
-        expect(')');
-        node->tr_stmt = stmt();
-        pos--;
-        return node;
-    }
-
     error("term() 不適切なトークンです: %s", GET_TK(tokens, pos)->input);
     return NULL;
 }
@@ -160,28 +142,24 @@ static Node *assign() {
 
 
 static Node *stmt() {
-    Node *node = assign();
-    if (GET_TK(tokens, pos)->ty == '}')
+    Node *node = malloc(sizeof(Node));
+
+    if (consume(TK_IF)) {
+        node->ty = ND_IF;
+        expect('(');
+        node->bl_expr = assign();
+        expect(')');
+        node->tr_stmt = stmt();
         return node;
-
-    for (;;) {
-        if (GET_TK(tokens, pos)->ty == TK_EOF)
-            return node;
-        else if (consume(';')) {
-            return node;
-        }
-        else if (consume(TK_RETURN)) {
-            node = new_node(TK_RETURN, NULL, equality());
-            expect(';');
-            return node;
-        }
-        else
-            error("stmt() 不適切なトークンです: %s", GET_TK(tokens, pos)->input);
+    } else if (consume(TK_RETURN)) {
+        node = new_node(TK_RETURN, NULL, equality());
+        expect(';');
+        return node;
+    } else {
+        node = assign();
+        expect(';');
+        return node;
     }
-
-    if (!consume(';'))
-        error("stmt() ';'ではないトークンです: %s", GET_TK(tokens, pos)->input); 
-    
 }
 
 
