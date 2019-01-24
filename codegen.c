@@ -78,11 +78,32 @@ void gen(Node *node, ...) {
         if (node->els_stmt != NULL) {
             if (node->els_stmt->stmts != NULL) {
                 for (int i = 0; i < node->els_stmt->stmts->len; i++) 
-                gen(node->els_stmt->stmts->data[i], va_arg(parent_func, Node*));
+                    gen(node->els_stmt->stmts->data[i], va_arg(parent_func, Node*));
             } else {
                 gen(node->els_stmt, va_arg(parent_func, Node*));
             }
         }
+        return;
+    }
+
+    if (node->ty == ND_WHILE) {
+        int while_label = label_counter++;
+        int while_end = label_counter++;
+        printf(".while_%d:\n", while_label);
+        gen(node->bl_expr);
+        printf("    pop rax;\n");
+        printf("    cmp rax, 0\n");
+        printf("    je .while_end_%d\n", while_end);
+
+        if (node->body->stmts != NULL) {
+            for (int i = 0; i < node->body->stmts->len; i++)
+                gen(node->body->stmts->data[i], va_arg(parent_func, Node*));
+        } else {
+            gen(node->body);
+        }
+
+        printf("    jmp .while_%d\n", while_label);
+        printf(".while_end_%d:\n", while_end);
         return;
     }
 

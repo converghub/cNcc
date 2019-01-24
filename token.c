@@ -27,6 +27,7 @@ Vector *tokenize(char *p) {
     map_put(keywords, "if", (void *)TK_IF);
     map_put(keywords, "else", (void *)TK_ELSE);
     map_put(keywords, "return", (void *)TK_RETURN);
+    map_put(keywords, "while", (void *)TK_WHILE);
 
 
     Vector *v = new_vector();

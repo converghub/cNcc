@@ -30,6 +30,7 @@ enum {
     TK_IDENT,       // Identifier
     TK_IF,          // if
     TK_ELSE,        // else
+    TK_WHILE,       // while
     TK_EQ,          // Equal : ==
     TK_NE,          // Not-equal : !=
     TK_EOF,         // End of input
@@ -49,6 +50,7 @@ enum {
     ND_RETURN,      // Return
     ND_IDENT,       // Identifier
     ND_IF,          // If
+    ND_WHILE,       // While
     ND_CMPD_STMT,   // Compound statement
     ND_FUNC_CALL,   // Function call
     ND_FUNC_DEF,    // Function definition

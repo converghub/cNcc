@@ -187,6 +187,18 @@ static Node *stmt() {
         node = new_node(TK_RETURN, NULL, equality());
         expect(';');
         return node;
+    } else if (consume(TK_WHILE)) {
+        node->ty = ND_WHILE;
+        expect('(');
+        node->bl_expr = assign();
+        expect(')');
+        if(consume('{')) {
+            node->body = cmpd_stmt();
+            expect('}');
+        } else {
+            node->body = stmt();
+        }
+        return node;
     } else {
         node = assign();
         expect(';');
