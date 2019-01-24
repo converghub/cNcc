@@ -67,7 +67,13 @@ void gen(Node *node, ...) {
         int ifend_label = label_counter++;
         printf("    je .if_end_%d\n", ifend_label);
 
-        gen(node->tr_stmt, va_arg(parent_func, Node*));
+        if (node->tr_stmt->stmts != NULL) {
+            for (int i = 0; i < node->tr_stmt->stmts->len; i++) 
+                gen(node->tr_stmt->stmts->data[i], va_arg(parent_func, Node*));
+        } else {
+            gen(node->tr_stmt, va_arg(parent_func, Node*));
+        }
+
         printf(".if_end_%d:\n", ifend_label);
         return;
     }

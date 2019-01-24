@@ -47,6 +47,7 @@ static Node *new_node_ident(char *name) {
 
 static Node *assign();
 static Node *stmt();
+static Node *cmpd_stmt();
 
 
 static Node *term() {
@@ -149,8 +150,14 @@ static Node *stmt() {
         expect('(');
         node->bl_expr = assign();
         expect(')');
-        node->tr_stmt = stmt();
-        return node;
+        if (consume('{')) {
+            node->tr_stmt = cmpd_stmt();
+            expect('}');
+            return node;
+        } else {
+            node->tr_stmt = stmt();
+            return node;
+        }
     } else if (consume(TK_RETURN)) {
         node = new_node(TK_RETURN, NULL, equality());
         expect(';');

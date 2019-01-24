@@ -47,3 +47,4 @@ try 21 'add(a,b,c,d,e,f) { return a+b+c+d+e+f; } main() { return add(1,2,3,4,5,6
 
 try 2 'main() { if (1) return 2; return 3; }'
 try 3 'main() { if (0) return 2; return 3; }'
+try 4 'one(x) { return x*2; } main() { if (1) {return one(2);} return 3; }'
