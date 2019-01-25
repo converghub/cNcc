@@ -76,6 +76,7 @@ typedef struct Node {
     // Function
     Vector *args;        // for Function call arguments
     struct Node *body;   // for Function defenition
+    int stacksize;       // for Function stacksize
 
     struct Node *init;
     struct Node *inc;

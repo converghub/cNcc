@@ -1,8 +1,9 @@
 #include "ccc.h"
 
+// parse.c
+extern Map *vars;
 
-static Map *vars;
-static int bpoff;
+static int stacksize;
 static char *args[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 static int label_counter = 0;
 
@@ -13,8 +14,8 @@ static void gen_lval(Node *node) {
 
 
     if (!map_exist(vars, node->name)) {
-        map_put(vars, node->name, (void *)(intptr_t)bpoff);
-        bpoff += 8;
+        stacksize += 8;
+        map_put(vars, node->name, (void *)(intptr_t)stacksize);
     }
 
     int offset = (intptr_t)map_get(vars, node->name);
@@ -35,7 +36,7 @@ void gen(Node *node, ...) {
         printf("    mov rbp, rsp\n");
 
         // 関数内の変数領域確保
-        printf("    sub rsp, 208\n");
+        printf("    sub rsp, %d\n", node->stacksize);
 
         // Arity
         for (int j = 0; j < node->args->len; j++) {
@@ -227,8 +228,7 @@ void gen(Node *node, ...) {
 void gen_code(Vector *code) {
     printf(".intel_syntax noprefix\n");
 
-    vars = new_map();
-    bpoff = 8;
+    stacksize = 0;
 
     // 先頭からコード生成
     for (int i = 0; i < code->len; i++) {

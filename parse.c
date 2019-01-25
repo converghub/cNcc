@@ -4,7 +4,10 @@
 
 static Vector *tokens;
 static int pos;
+static int stacksize;
 
+// for codegen.c
+Map *vars;
 
 
 static void expect(int ty) {
@@ -41,6 +44,11 @@ static Node *new_node_ident(char *name) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_IDENT;
     node->name = name;
+
+    if (!map_exist(vars, node->name)) {
+        stacksize += 8;
+        map_put(vars, node->name, (void *)(intptr_t)stacksize);
+    }
     return node;    
 }
 
@@ -270,8 +278,13 @@ static Node *function() {
     pos++;
 
     expect('(');
+    int argc = 0;
     while (GET_TK(tokens, pos)->ty != (')')) {
         vec_push(node->args, term());
+
+        stacksize += 8;
+        map_put(vars, ((Node *)node->args->data[argc++])->name, (void *)(intptr_t)stacksize);
+
         if (consume(',')) {
             if (GET_TK(tokens, pos)->ty == (')'))
                 error("function() ','が不適切な場所にあります\n") ;           
@@ -279,6 +292,8 @@ static Node *function() {
         }
     }
     expect(')');
+    //printf("node->args->len: %d\n", node->args->len);
+    //printf("stacksize :%d\n", stacksize);
 
     expect('{');
     node->body = cmpd_stmt();
@@ -290,10 +305,14 @@ static Node *function() {
 
 Vector *parse(Vector *tk) {
     tokens = tk;
-
     Vector *v = new_vector();
+    vars = new_map();
+    int func_counter = 0;
 
-    while (GET_TK(tokens, pos)->ty != TK_EOF)
+    while (GET_TK(tokens, pos)->ty != TK_EOF) {
+        stacksize = 0;
         vec_push(v, function());
+        ((Node* )v->data[func_counter++])->stacksize = stacksize;
+    }
     return v;
 }
