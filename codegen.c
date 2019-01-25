@@ -148,9 +148,14 @@ void gen(Node *node, ...) {
 
 
     if (node->ty == ND_FUNC_CALL) {
-        for (int i = 0; i < node->args->len; i++)
-            printf("    mov %s, %d\n", args[i], ((Node *)(node->args->data[i]))->val);
- 
+        for (int i = 0; i < node->args->len; i++) {
+           gen(node->args->data[i]);
+        }
+
+        for (int i = node->args->len - 1; i >= 0; i--) {
+            printf("    pop %s\n", args[i]);
+        }
+
         printf("    call %s\n", node->name);
         printf("    push rax\n");
         return;

@@ -271,6 +271,7 @@ static Node *function() {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_FUNC_DEF;
     node->args = new_vector();
+    stacksize = 0;
 
     if (GET_TK(tokens, pos)->ty != TK_IDENT)
         error("function() : Name expected, but got %s\n", GET_TK(tokens, pos)->input);
@@ -282,8 +283,10 @@ static Node *function() {
     while (GET_TK(tokens, pos)->ty != (')')) {
         vec_push(node->args, term());
 
-        stacksize += 8;
-        map_put(vars, ((Node *)node->args->data[argc++])->name, (void *)(intptr_t)stacksize);
+        if (!map_exist(vars, ((Node *)node->args->data[argc])->name)) {
+            stacksize += 8;
+            map_put(vars, ((Node *)node->args->data[argc++])->name, (void *)(intptr_t)stacksize);
+        }
 
         if (consume(',')) {
             if (GET_TK(tokens, pos)->ty == (')'))
@@ -292,8 +295,6 @@ static Node *function() {
         }
     }
     expect(')');
-    //printf("node->args->len: %d\n", node->args->len);
-    //printf("stacksize :%d\n", stacksize);
 
     expect('{');
     node->body = cmpd_stmt();
@@ -310,7 +311,6 @@ Vector *parse(Vector *tk) {
     int func_counter = 0;
 
     while (GET_TK(tokens, pos)->ty != TK_EOF) {
-        stacksize = 0;
         vec_push(v, function());
         ((Node* )v->data[func_counter++])->stacksize = stacksize;
     }

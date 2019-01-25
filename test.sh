@@ -72,3 +72,6 @@ try 1 "main(){(1 == 1) || (2 == 2);}"
 try 1 "main(){(1 == 1) || (2 == 0);}"
 try 1 "main(){(1 == 3) || (2 == 2);}"
 try 0 "main(){(1 == 3) || (2 == 0);}"
+
+try 4 'f(a){2 * a;} main(){c=f(f(b=1));c;}'
+try 9 'f(a, b){return 2 * a + b;} main(){d=1; c=f(f(d,e=1), f(1,f=1)); return c;}'
