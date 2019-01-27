@@ -308,7 +308,10 @@ static Node *function() {
     expect('(');
     int argc = 0;
     while (GET_TK(tokens, pos)->ty != (')')) {
-        vec_push(node->args, term());
+        if (consume(TK_INT))
+            vec_push(node->args, term());
+        else
+            error("function(): Argument type expected, but got %s.\n", GET_TK(tokens, pos)->input);
 
         if (!map_exist(vars, ((Node *)node->args->data[argc])->name)) {
             stacksize += 8;
