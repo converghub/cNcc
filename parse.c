@@ -185,6 +185,22 @@ static Node *assign() {
 }
 
 
+static Node* decl() {
+    Node *node = malloc(sizeof(Node));
+    node->ty = ND_VAR_DEF;
+    if (GET_TK(tokens, pos)->ty != TK_IDENT)
+        error("variable name expected, but got %s", GET_TK(tokens, pos)->input);
+    node->name = GET_TK(tokens, pos)->name;
+    stacksize += 8;
+    map_put(vars, node->name, (void *)(intptr_t)stacksize);
+    pos++;
+
+    if (consume('='))
+        node->init = assign();
+    return node;
+}
+
+
 static Node *stmt() {
     Node *node = malloc(sizeof(Node));
 
@@ -213,16 +229,7 @@ static Node *stmt() {
         return node;
 
     } else if (consume(TK_INT)) {
-        node->ty = ND_VAR_DEF;
-        if (GET_TK(tokens, pos)->ty != TK_IDENT)
-            error("variable name expected, but got %s", GET_TK(tokens, pos)->input);
-        node->name = GET_TK(tokens, pos)->name;
-        stacksize += 8;
-        map_put(vars, node->name, (void *)(intptr_t)stacksize);
-        pos++;
-
-        if (consume('='))
-            node->init = assign();
+        node = decl();
         expect(';');
         return node;
 
@@ -247,7 +254,10 @@ static Node *stmt() {
     } else if (consume(TK_FOR)) {
         node->ty = ND_FOR;
         expect('(');
-        node->init = assign();
+        if (consume(TK_INT))
+            node->init = decl();
+        else
+            node->init = assign();
         expect(';');
         node->bl_expr = assign();
         expect(';');
