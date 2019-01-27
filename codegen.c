@@ -3,7 +3,6 @@
 // parse.c
 extern Map *vars;
 
-static int stacksize;
 static char *args[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 static int label_counter = 0;
 
@@ -12,10 +11,8 @@ static void gen_lval(Node *node) {
     if (node->ty != ND_IDENT)
         error("gen_lval(): not a lvalue.");
 
-
     if (!map_exist(vars, node->name)) {
-        stacksize += 8;
-        map_put(vars, node->name, (void *)(intptr_t)stacksize);
+        error("undefined variable: %s", node->name);
     }
 
     int offset = (intptr_t)map_get(vars, node->name);
@@ -146,6 +143,9 @@ void gen(Node *node, ...) {
         return;
     }
 
+    if (node->ty == ND_VAR_DEF) {
+        return;
+    }
 
     if (node->ty == ND_FUNC_CALL) {
         for (int i = 0; i < node->args->len; i++) {
@@ -232,8 +232,6 @@ void gen(Node *node, ...) {
 
 void gen_code(Vector *code) {
     printf(".intel_syntax noprefix\n");
-
-    stacksize = 0;
 
     // 先頭からコード生成
     for (int i = 0; i < code->len; i++) {

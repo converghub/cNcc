@@ -44,11 +44,6 @@ static Node *new_node_ident(char *name) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_IDENT;
     node->name = name;
-
-    if (!map_exist(vars, node->name)) {
-        stacksize += 8;
-        map_put(vars, node->name, (void *)(intptr_t)stacksize);
-    }
     return node;    
 }
 
@@ -216,10 +211,24 @@ static Node *stmt() {
             }
         }
         return node;
+
+    } else if (consume(TK_INT)) {
+        node->ty = ND_VAR_DEF;
+        if (GET_TK(tokens, pos)->ty != TK_IDENT)
+            error("variable name expected, but got %s", GET_TK(tokens, pos)->input);
+        node->name = GET_TK(tokens, pos)->name;
+        stacksize += 8;
+        map_put(vars, node->name, (void *)(intptr_t)stacksize);
+
+        pos++;
+        expect(';');
+        return node;
+
     } else if (consume(TK_RETURN)) {
         node = new_node(TK_RETURN, NULL, lor());
         expect(';');
         return node;
+
     } else if (consume(TK_WHILE)) {
         node->ty = ND_WHILE;
         expect('(');
@@ -232,6 +241,7 @@ static Node *stmt() {
             node->body = stmt();
         }
         return node;
+
     } else if (consume(TK_FOR)) {
         node->ty = ND_FOR;
         expect('(');
@@ -248,6 +258,7 @@ static Node *stmt() {
             node->body = stmt();
         }
         return node;
+
     } else {
         node = assign();
         expect(';');
@@ -272,6 +283,10 @@ static Node *function() {
     node->ty = ND_FUNC_DEF;
     node->args = new_vector();
     stacksize = 0;
+
+    if (GET_TK(tokens, pos)->ty != TK_INT) 
+        error("function-return type expected, but got %s", GET_TK(tokens, pos)->input);
+    pos++;
 
     if (GET_TK(tokens, pos)->ty != TK_IDENT)
         error("function() : Name expected, but got %s\n", GET_TK(tokens, pos)->input);

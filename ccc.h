@@ -28,6 +28,7 @@ enum {
     TK_NUM = 256,   // Integer
     TK_RETURN,      // Return
     TK_IDENT,       // Identifier
+    TK_INT,         // "int"
     TK_IF,          // if
     TK_ELSE,        // else
     TK_WHILE,       // while
@@ -52,6 +53,7 @@ enum {
     ND_NUM = 256,   // Integer
     ND_RETURN,      // Return
     ND_IDENT,       // Identifier
+    ND_VAR_DEF,     // Variable definition
     ND_IF,          // If
     ND_WHILE,       // While
     ND_FOR,         // For
