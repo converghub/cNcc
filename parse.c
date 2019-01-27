@@ -219,8 +219,10 @@ static Node *stmt() {
         node->name = GET_TK(tokens, pos)->name;
         stacksize += 8;
         map_put(vars, node->name, (void *)(intptr_t)stacksize);
-
         pos++;
+
+        if (consume('='))
+            node->init = assign();
         expect(';');
         return node;
 

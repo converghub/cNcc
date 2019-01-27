@@ -144,6 +144,16 @@ void gen(Node *node, ...) {
     }
 
     if (node->ty == ND_VAR_DEF) {
+        if (!node->init)
+            return;
+
+        node->ty = ND_IDENT;
+        gen_lval(node);
+        gen(node->init);
+        printf("    pop rdi\n");
+        printf("    pop rax\n");
+        printf("    mov [rax], rdi\n");
+        printf("    push rdi\n");
         return;
     }
 
