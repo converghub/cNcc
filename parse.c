@@ -231,9 +231,10 @@ static Node *assign() {
 }
 
 
-static Node* decl() {
+static Node* decl(int CTYPE) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_VAR_DEF;
+    node->cty = ctype(CTYPE);
     if (GET_TK(tokens, pos)->ty != TK_IDENT)
         error("variable name expected, but got %s", GET_TK(tokens, pos)->input);
     node->name = GET_TK(tokens, pos)->name;
@@ -280,7 +281,7 @@ static Node *stmt() {
 
     } else if (consume(TK_INT)) {
         node->cty = ctype(TK_INT);
-        node = decl();
+        node = decl(TK_INT);
         expect(';');
         return node;
 
@@ -306,7 +307,7 @@ static Node *stmt() {
         node->ty = ND_FOR;
         expect('(');
         if (consume(TK_INT))
-            node->init = decl();
+            node->init = decl(TK_INT);
         else
             node->init = assign();
         expect(';');
@@ -366,8 +367,9 @@ static Node *function() {
 
         if (!map_exist(vars, ((Node *)node->args->data[argc])->name)) {
             stacksize += 8;
+            ((Node *)node->args->data[argc])->cty = ctype(TK_INT);
             Var *var = malloc(sizeof(Var));
-            var->cty = node->cty;
+            var->cty = ((Node *)node->args->data[argc])->cty;
             var->offset = stacksize;
             map_put(vars, ((Node *)node->args->data[argc++])->name, var);
         }

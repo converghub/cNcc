@@ -16,6 +16,7 @@ static void gen_lval(Node *node) {
     }
 
     Var *var = map_get(vars, node->name);
+    node->cty = var->cty;
     printf("    mov rax, rbp\n");
     printf("    sub rax, %d\n", var->offset);
     printf("    push rax\n");
