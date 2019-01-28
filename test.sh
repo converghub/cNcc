@@ -4,7 +4,7 @@ try() {
   input="$2"
 
   ./ccc "$input" > tmp.s
-  gcc -o tmp tmp.s tmp-plus.s
+  gcc -o tmp tmp.s tmp-test.o
   ./tmp
   actual="$?"
 
@@ -16,7 +16,14 @@ try() {
   fi
 }
 
-echo 'int plus(int x, int y){ return x + y; }' | gcc -S -xc -c -o tmp-plus.s -
+cat <<EOF | gcc -xc -c -o tmp-test.o -
+int plus(int x, int y) { return x + y; }
+int *alloc(int x) {
+  static int arr[1];
+  arr[0] = x;
+  return arr;
+}
+EOF
 
 try 3 "int one(int x) { return x+2; } int main() {return one(1);}"
 try 21 'int main() { 5+20-4;}'
@@ -76,3 +83,6 @@ try 0 "int main(){(1 == 3) || (2 == 0);}"
 
 try 4 'int f(int a){2 * a;} int main(){int b; int c=f(f(b=1));c;}'
 try 9 'int f(int a, int b){return 2 * a + b;} int main(){int e; int f; int d=1; int c=f(f(d,e=1), f(1,f=1)); return c;}'
+
+try 5 'int main() { int x; int *p = &x; x = 5; return *p;}'
+try 42 'int main() { int *p = alloc(42); return *p; }'

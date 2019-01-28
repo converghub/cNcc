@@ -8,7 +8,7 @@ static int label_counter = 0;
 
 // gen
 static void gen_lval(Node *node) {
-    if (node->ty != ND_IDENT)
+    if (node->ty != ND_IDENT && node->ty != ND_VAR_DEF && node->ty != ND_ADDR)
         error("gen_lval(): not a lvalue.");
 
     if (!map_exist(vars, node->name)) {
@@ -147,7 +147,6 @@ void gen(Node *node, ...) {
         if (!node->init)
             return;
 
-        node->ty = ND_IDENT;
         gen_lval(node);
         gen(node->init);
         printf("    pop rdi\n");
@@ -180,6 +179,18 @@ void gen(Node *node, ...) {
         printf("    pop rax\n");
         printf("    mov [rax], rdi\n");
         printf("    push rdi\n");
+        return;
+    }
+
+    if (node->ty == ND_DEREF) {
+        gen(node->rhs);
+        printf("    mov rax, [rax]\n");
+        printf("    push rax\n");
+        return;
+    }
+
+    if (node->ty == ND_ADDR) {
+        gen_lval(node->rhs);
         return;
     }
 

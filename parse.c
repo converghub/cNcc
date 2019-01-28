@@ -5,6 +5,7 @@
 static Vector *tokens;
 static int pos;
 static int stacksize;
+static Type int_cty = {INT, NULL};
 
 // for codegen.c
 Map *vars;
@@ -24,6 +25,23 @@ static int consume(int ty) {
     return 1;
 }
 
+static Type *ptrof (Type *base) {
+    Type *ctype = malloc(sizeof(Type));
+    ctype->ty = PTR;
+    ctype->ptrof = base;
+    return ctype;
+}
+
+static Type *ctype(int CTYPE) {
+    if (CTYPE != TK_INT)
+        error("ctype(): Typename expected, but got %s\n", GET_TK(tokens, pos)->input);
+
+    Type *ctype = &int_cty;
+    while (consume('*'))
+        ctype = ptrof(ctype);
+    return ctype;
+}
+
 // Node
 static Node *new_node(int ty, Node *lhs, Node *rhs) {
     Node *node = malloc(sizeof(Node));
@@ -36,6 +54,7 @@ static Node *new_node(int ty, Node *lhs, Node *rhs) {
 static Node *new_node_num(int val) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_NUM;
+    node->cty = &int_cty;
     node->val = val;
     return node;
 }
@@ -49,6 +68,7 @@ static Node *new_node_ident(char *name) {
 
 
 static Node *assign();
+static Node *mul();
 static Node *stmt();
 static Node *cmpd_stmt();
 
@@ -95,14 +115,31 @@ static Node *term() {
 }
 
 
+static Node *unary() {
+    if (consume('*')) {
+        Node *node = malloc(sizeof(Node));
+        node->ty = ND_DEREF;
+        node->rhs = mul();
+        return node;
+    }
+    if (consume('&')) {
+        Node *node = malloc(sizeof(Node));
+        node->ty = ND_ADDR;
+        node->rhs = mul();
+        return node;
+    }
+    return term();
+}
+
+
 static Node *mul() {
-    Node *node = term();
+    Node *node = unary();
 
     for (;;) {
         if (consume('*'))
-            node = new_node('*', node, term());
+            node = new_node('*', node, unary());
         else if (consume('/'))
-            node = new_node('/', node, term());
+            node = new_node('/', node, unary());
         else
             return node;
     }
@@ -229,6 +266,7 @@ static Node *stmt() {
         return node;
 
     } else if (consume(TK_INT)) {
+        node->cty = ctype(TK_INT);
         node = decl();
         expect(';');
         return node;

@@ -48,6 +48,18 @@ typedef struct {
 } Token;
 
 
+// Pointer
+enum {
+    INT,
+    PTR,
+};
+
+typedef struct Type {
+    int ty;
+    struct Type *ptrof;
+} Type;
+
+
 // Node
 enum {
     ND_NUM = 256,   // Integer
@@ -57,6 +69,8 @@ enum {
     ND_IF,          // If
     ND_WHILE,       // While
     ND_FOR,         // For
+    ND_DEREF,       // Pointer dereference : *
+    ND_ADDR,        // Address-of operater : &
     ND_CMPD_STMT,   // Compound statement
     ND_FUNC_CALL,   // Function call
     ND_FUNC_DEF,    // Function definition
@@ -67,12 +81,13 @@ enum {
 };
 
 typedef struct Node {
-    int ty;
+    int ty;              // Node type
+    Type *cty;           // C type
     struct Node *lhs;
     struct Node *rhs;
     int val;             // for ND_NUM
     char *name;          // for ND_IDENT
-    struct Node *expr;   // for ND_RETURN
+    struct Node *expr;   // for ND_RETURN, ND_DEREF
     Vector *stmts;       // for ND_CMPD_STMT
 
     // Function
