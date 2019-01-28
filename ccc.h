@@ -60,6 +60,13 @@ typedef struct Type {
 } Type;
 
 
+// Var
+typedef struct {
+  Type *cty;
+  int offset;
+} Var;
+
+
 // Node
 enum {
     ND_NUM = 256,   // Integer
@@ -108,6 +115,7 @@ typedef struct Node {
 
 // parse.c
 Vector *parse(Vector *tk);
+int size_of(Type *ctype);
 
 // token.c
 Vector *tokenize(char *p);

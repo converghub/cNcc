@@ -10,7 +10,6 @@ static Type int_cty = {INT, NULL};
 // for codegen.c
 Map *vars;
 
-
 static void expect(int ty) {
     Token *t = tokens->data[pos];
     if (t->ty != ty)
@@ -40,6 +39,16 @@ static Type *ctype(int CTYPE) {
     while (consume('*'))
         ctype = ptrof(ctype);
     return ctype;
+}
+
+int size_of(Type *ctype) {
+    if (ctype->ty == INT) 
+        return 4;
+    else if (ctype->ty == PTR)
+        return 8;
+    else
+        error("size_of(): invalid ty value.\n");
+        return 0;
 }
 
 // Node
@@ -228,8 +237,12 @@ static Node* decl() {
     if (GET_TK(tokens, pos)->ty != TK_IDENT)
         error("variable name expected, but got %s", GET_TK(tokens, pos)->input);
     node->name = GET_TK(tokens, pos)->name;
+
     stacksize += 8;
-    map_put(vars, node->name, (void *)(intptr_t)stacksize);
+    Var *var = malloc(sizeof(Var));
+    var->cty = node->cty;
+    var->offset = stacksize;
+    map_put(vars, node->name, var);
     pos++;
 
     if (consume('='))
@@ -353,7 +366,10 @@ static Node *function() {
 
         if (!map_exist(vars, ((Node *)node->args->data[argc])->name)) {
             stacksize += 8;
-            map_put(vars, ((Node *)node->args->data[argc++])->name, (void *)(intptr_t)stacksize);
+            Var *var = malloc(sizeof(Var));
+            var->cty = node->cty;
+            var->offset = stacksize;
+            map_put(vars, ((Node *)node->args->data[argc++])->name, var);
         }
 
         if (consume(',')) {

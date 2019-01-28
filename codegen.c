@@ -15,9 +15,9 @@ static void gen_lval(Node *node) {
         error("undefined variable: %s", node->name);
     }
 
-    int offset = (intptr_t)map_get(vars, node->name);
+    Var *var = map_get(vars, node->name);
     printf("    mov rax, rbp\n");
-    printf("    sub rax, %d\n", offset);
+    printf("    sub rax, %d\n", var->offset);
     printf("    push rax\n");
 }
 
