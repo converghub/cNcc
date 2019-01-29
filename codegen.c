@@ -185,6 +185,7 @@ void gen(Node *node, ...) {
 
     if (node->ty == ND_DEREF) {
         gen(node->rhs);
+        printf("    pop rax\n");
         printf("    mov rax, [rax]\n");
         printf("    push rax\n");
         return;
@@ -207,11 +208,46 @@ void gen(Node *node, ...) {
     printf("    pop rdi\n");
     printf("    pop rax\n");
 
+    int flag = 0;
+    if (node->rhs->cty != NULL) {
+        if (node->rhs->cty->ty == PTR) {
+            flag = 1;  
+        }
+    }
+    if (node->lhs->cty != NULL) {
+        if (node->lhs->cty->ty == PTR) {
+            flag = 2;
+        }
+    }
+
     switch (node->ty) {
         case '+':
+            if (flag == 1) {
+                printf("    push rdi\n");
+                printf("    mov rdi, %d\n",  size_of(node->rhs->cty->ptrof));
+                printf("    mul rdi\n");
+                printf("    pop rdi\n");                
+            } else if (flag == 2) {
+                printf("    push rax\n");
+                printf("    mov rax, rdi\n");
+                printf("    mov rdi, %d\n",  size_of(node->lhs->cty->ptrof));
+                printf("    mul rdi\n");
+                printf("    mov rdi, rax\n");
+                printf("    pop rax\n");
+            }
             printf("    add rax, rdi\n");
             break;
         case '-':
+            if (flag == 1) {
+                error("gen():  <expression> - <pointer> is not supported currently.\n");
+            } else if (flag == 2) {
+                printf("    push rax\n");
+                printf("    mov rax, rdi\n");
+                printf("    mov rdi, %d\n",  size_of(node->lhs->cty->ptrof));
+                printf("    mul rdi\n");
+                printf("    mov rdi, rax\n");
+                printf("    pop rax\n");                
+            }
             printf("    sub rax, rdi\n");
             break;
         case '*':

@@ -280,7 +280,6 @@ static Node *stmt() {
         return node;
 
     } else if (consume(TK_INT)) {
-        node->cty = ctype(TK_INT);
         node = decl(TK_INT);
         expect(';');
         return node;
