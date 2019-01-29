@@ -211,6 +211,11 @@ void gen(Node *node, ...) {
         return;
     }
 
+    if (node->ty == ND_SIZEOF) {
+        gen(node->rhs);
+        return;
+    }
+
     gen(node->lhs);
     gen(node->rhs);
 

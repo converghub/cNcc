@@ -120,6 +120,22 @@ static Node *unary() {
         node->rhs = mul();
         return node;
     }
+    if (consume(TK_SIZEOF)) {
+        Node *node = malloc(sizeof(Node));
+        node->ty = ND_SIZEOF;
+        node->rhs = unary();
+        if (node->rhs->ty == ND_IDENT) {
+            Var *var = map_get(vars, node->rhs->name);
+            node->rhs->cty = var->cty;
+        }
+        Node *ret = malloc(sizeof(Node));
+        ret->ty = ND_NUM;
+        ret->cty = INT;
+        ret->val = size_of(node->rhs->cty);
+        node->rhs = ret;
+        return node;
+    }
+    
     return term();
 }
 
@@ -225,8 +241,6 @@ static Node* decl(int CTYPE) {
     if (GET_TK(tokens, pos)->ty != TK_IDENT)
         error("variable name expected, but got %s", GET_TK(tokens, pos)->input);
     node->name = GET_TK(tokens, pos)->name;
-    Var *var = malloc(sizeof(Var));
-    var->cty = node->cty;
     pos++;
 
     // Check array 
@@ -245,7 +259,9 @@ static Node* decl(int CTYPE) {
 
     // Set stacksize
     stacksize += 8;
+    Var *var = malloc(sizeof(Var));
     var->offset = stacksize;
+    var->cty = node->cty;
     map_put(vars, node->name, var);
 
     // Check initializer

@@ -41,7 +41,6 @@ int **alloc_ptr_ptr(int x) {
 }
 EOF
 
-try 3 "int one(int x) { return x+2; } int main() {return one(1);}"
 try 21 'int main() { 5+20-4;}'
 try 41 "int main() {12 + 34 - 5;}"
 try 47 "int main() {5+6*7;}"
@@ -113,3 +112,8 @@ try 9 'int main() { int *p = alloc2(2, 7); return *p + *(p - 1); }'
 try 1 'int main() { int ary[2]; *ary=1; return *ary; }'
 try 6 'int main() { int ary[3]; *ary=1; *(ary+1)=2; *(ary+2) = 3; return *ary + *(ary+1) + *(ary+2);}'
 try 10 'int main() { int ary[4];*ary=1;*(ary+1)=2;*(ary+2)=3;*(ary+3)=4;return *ary+*(ary+1)+*(ary+2)+*(ary+3);}'
+
+try 4 'int main() { int x; return sizeof(x); }'
+try 4 'int main() { int x; return sizeof(x); }'
+try 8 'int main() { int *x; return sizeof x; }'
+try 16 'int main() { int x[4]; return sizeof x; }'

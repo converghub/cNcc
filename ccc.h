@@ -26,7 +26,8 @@ typedef struct {
 // Token
 enum {
     TK_NUM = 256,   // Integer
-    TK_RETURN,      // Return
+    TK_RETURN,      // "return"
+    TK_SIZEOF,      // "sizeof"
     TK_IDENT,       // Identifier
     TK_INT,         // "int"
     TK_IF,          // if
@@ -78,6 +79,7 @@ typedef struct {
 enum {
     ND_NUM = 256,   // Integer
     ND_RETURN,      // Return
+    ND_SIZEOF,      // Sizeof
     ND_IDENT,       // Identifier
     ND_VAR_DEF,     // Variable definition
     ND_IF,          // If
