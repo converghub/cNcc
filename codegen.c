@@ -8,6 +8,9 @@ static int label_counter = 0;
 
 // gen
 static void gen_lval(Node *node) {
+    if (node->ty == ND_DEREF)
+        return gen(node->rhs);
+
     if (node->ty != ND_IDENT && node->ty != ND_VAR_DEF && node->ty != ND_ADDR)
         error("gen_lval(): not a lvalue.");
 
@@ -30,8 +33,11 @@ void gen(Node *node, ...) {
         printf(".global %s\n", node->name);
         printf("%s:\n", node->name);
         // Prologue.
+        printf("    push rbx\n");
         printf("    push rbp\n");
         printf("    mov rbp, rsp\n");
+        printf("    mov rbx, rsp\n");
+        printf("    and rsp, ~0x0f\n");
 
         // 関数内の変数領域確保
         printf("    sub rsp, %d\n", node->stacksize);
@@ -54,6 +60,7 @@ void gen(Node *node, ...) {
         printf("    pop rax\n");
         printf("    mov rsp, rbp\n");
         printf("    pop rbp\n");
+        printf("    pop rbx\n");
         printf("    ret\n");
         return;
     }
@@ -145,9 +152,8 @@ void gen(Node *node, ...) {
     }
 
     if (node->ty == ND_VAR_DEF) {
-        if (!node->init)
+        if (node->init == NULL) 
             return;
-
         gen_lval(node);
         gen(node->init);
         printf("    pop rdi\n");
@@ -166,7 +172,10 @@ void gen(Node *node, ...) {
             printf("    pop %s\n", args[i]);
         }
 
+        printf("    mov rbx, rsp\n");
+        printf("    and rsp, ~0x0f\n");
         printf("    call %s\n", node->name);
+        printf("    mov rsp, rbx\n");
         printf("    push rax\n");
         return;
     }

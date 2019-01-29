@@ -24,31 +24,14 @@ static int consume(int ty) {
     return 1;
 }
 
-static Type *ptrof (Type *base) {
-    Type *ctype = malloc(sizeof(Type));
-    ctype->ty = PTR;
-    ctype->ptrof = base;
-    return ctype;
-}
-
 static Type *ctype(int CTYPE) {
     if (CTYPE != TK_INT)
         error("ctype(): Typename expected, but got %s\n", GET_TK(tokens, pos)->input);
 
     Type *ctype = &int_cty;
     while (consume('*'))
-        ctype = ptrof(ctype);
+        ctype = ptr_of(ctype);
     return ctype;
-}
-
-int size_of(Type *ctype) {
-    if (ctype->ty == INT) 
-        return 4;
-    else if (ctype->ty == PTR)
-        return 8;
-    else
-        error("size_of(): invalid ty value.\n");
-        return 0;
 }
 
 // Node
@@ -234,18 +217,38 @@ static Node *assign() {
 static Node* decl(int CTYPE) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_VAR_DEF;
+
+    // Set C type name
     node->cty = ctype(CTYPE);
+
+    // Store identifer
     if (GET_TK(tokens, pos)->ty != TK_IDENT)
         error("variable name expected, but got %s", GET_TK(tokens, pos)->input);
     node->name = GET_TK(tokens, pos)->name;
-
-    stacksize += 8;
     Var *var = malloc(sizeof(Var));
     var->cty = node->cty;
-    var->offset = stacksize;
-    map_put(vars, node->name, var);
     pos++;
 
+    // Check array 
+    Vector *ary_size = new_vector();
+    while (consume('[')) {
+        Node *len = term();
+        if (len->ty != ND_NUM)
+            error("decl(): number expected.\n");
+        vec_push(ary_size, len);   
+        expect(']');
+    }
+    for (int i = ary_size->len - 1; i >= 0; i--) {
+        Node *len_node = ary_size->data[i];
+        node->cty = ary_of(node->cty, len_node->val);
+    }
+
+    // Set stacksize
+    stacksize += 8;
+    var->offset = stacksize;
+    map_put(vars, node->name, var);
+
+    // Check initializer
     if (consume('='))
         node->init = assign();
     return node;

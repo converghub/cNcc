@@ -109,3 +109,7 @@ try 9 'int main() { int *p = alloc1(3, 5); return *p + *p + *(p); }'
 try 8 'int main() { int *p = alloc1(3, 5); return *p + *(1 + p); }'
 try 8 'int main() { int *p = alloc1(3, 5); return *p + *(p + 1); }'
 try 9 'int main() { int *p = alloc2(2, 7); return *p + *(p - 1); }'
+
+try 1 'int main() { int ary[2]; *ary=1; return *ary; }'
+try 6 'int main() { int ary[3]; *ary=1; *(ary+1)=2; *(ary+2) = 3; return *ary + *(ary+1) + *(ary+2);}'
+try 10 'int main() { int ary[4];*ary=1;*(ary+1)=2;*(ary+2)=3;*(ary+3)=4;return *ary+*(ary+1)+*(ary+2)+*(ary+3);}'

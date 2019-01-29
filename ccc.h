@@ -52,11 +52,18 @@ typedef struct {
 enum {
     INT,
     PTR,
+    ARY,
 };
 
 typedef struct Type {
     int ty;
+
+    // Pointer
     struct Type *ptrof;
+
+    // Array
+    struct Type *aryof;
+    int len;
 } Type;
 
 
@@ -115,7 +122,7 @@ typedef struct Node {
 
 // parse.c
 Vector *parse(Vector *tk);
-int size_of(Type *ctype);
+
 
 // token.c
 Vector *tokenize(char *p);
@@ -129,7 +136,9 @@ Map *new_map();
 void map_put(Map *map, char *key, void *val);
 void *map_get(Map *map, char *key);
 bool map_exist(Map *map, char *key);
-
+Type *ptr_of (Type *base);
+int size_of(Type *ctype);
+Type *ary_of(Type *base, int len);
 
 // codegen.c
 void gen(Node *node, ...);

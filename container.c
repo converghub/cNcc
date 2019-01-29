@@ -66,6 +66,34 @@ bool map_exist(Map *map, char *key) {
 }
 
 
+//
+Type *ptr_of(Type *base) {
+    Type *ctype = malloc(sizeof(Type));
+    ctype->ty = PTR;
+    ctype->ptrof = base;
+    return ctype;
+}
+
+Type *ary_of(Type *base, int len) {
+    Type *cty = malloc(sizeof(Type));
+    cty->ty = ARY;
+    cty->aryof = base;
+    cty->len = len;
+    return cty;
+}
+
+int size_of(Type *cty) {
+    if (cty->ty == INT) 
+        return 4;
+    else if (cty->ty == PTR)
+        return 8;
+    else if (cty->ty == ARY)
+        return size_of(cty->aryof) * cty->len;
+    else
+        error("size_of(): invalid ty value.\n");
+        return 0;
+}
+
 /* test functions */ 
 
 static void vec_test () {
