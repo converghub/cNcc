@@ -113,7 +113,7 @@ static Node *postfix() {
         // TODO: fill this
         Node *node = malloc(sizeof(Node));
         node->ty = ND_DEREF;
-        node->rhs = new_node('+', lhs, term());
+        node->rhs = new_node('+', lhs, assign());
         lhs = node;
         expect(']');
     }
