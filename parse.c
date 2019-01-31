@@ -107,6 +107,20 @@ static Node *term() {
 }
 
 
+static Node *postfix() {
+    Node *lhs = term();
+    while (consume('[')) {
+        // TODO: fill this
+        Node *node = malloc(sizeof(Node));
+        node->ty = ND_DEREF;
+        node->rhs = new_node('+', lhs, term());
+        lhs = node;
+        expect(']');
+    }
+    return lhs;
+}
+
+
 static Node *unary() {
     if (consume('*')) {
         Node *node = malloc(sizeof(Node));
@@ -136,7 +150,7 @@ static Node *unary() {
         return node;
     }
     
-    return term();
+    return postfix();
 }
 
 

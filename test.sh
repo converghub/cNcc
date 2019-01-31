@@ -41,13 +41,6 @@ long **alloc_ptr_ptr(long x) {
 }
 EOF
 
-try 1 'int main() { int a[3]; *a=1;  return *a;}'
-try 2 'int main() { int a[3]; *a=1; *(1+a)=2; return *(a+1);}'
-try 5 'int main() { int x; int *p = &x; x = 5; return *p;}'
-try 2 'int main() { int **p = alloc_ptr_ptr(2); return **p; }'
-try 3 'int main() { int a[2]; *a=1; *(1+a)=2; return *a+*(a+1);}'
-try 3 'int main() { int a[2]; *a=1; *(a+1)=2; int *p; p=a; return *p+*(p+1);}'
-try 6 'int main() { int ary[3]; *ary=1; *(ary+1)=2; *(ary+2) = 3; return *ary + *(ary+1) + *(ary+2);}'
 try 21 'int main() { 5+20-4;}'
 try 41 "int main() {12 + 34 - 5;}"
 try 47 "int main() {5+6*7;}"
@@ -116,12 +109,19 @@ try 8 'int main() { int *p = alloc1(3, 5); return *p + *(1 + p); }'
 try 8 'int main() { int *p = alloc1(3, 5); return *p + *(p + 1); }'
 try 9 'int main() { int *p = alloc2(2, 7); return *p + *(p - 1); }'
 
-#try 1 'int main() { int ary[2]; *ary=1; return *ary; }'
-#try 6 'int main() { int ary[3]; *ary=1; *(ary+1)=2; *(ary+2) = 3; return *ary + *(ary+1) + *(ary+2);}'
-#try 10 'int main() { int ary[4];*ary=1;*(ary+1)=2;*(ary+2)=3;*(ary+3)=4;return *ary+*(ary+1)+*(ary+2)+*(ary+3);}'
+try 1 'int main() { int a[3]; *a=1;  return *a;}'
+try 2 'int main() { int a[3]; *a=1; *(1+a)=2; return *(a+1);}'
+try 5 'int main() { int x; int *p = &x; x = 5; return *p;}'
+try 2 'int main() { int **p = alloc_ptr_ptr(2); return **p; }'
+try 3 'int main() { int a[2]; *a=1; *(1+a)=2; return *a+*(a+1);}'
+try 3 'int main() { int a[2]; *a=1; *(a+1)=2; int *p; p=a; return *p+*(p+1);}'
+try 6 'int main() { int ary[3]; *ary=1; *(ary+1)=2; *(ary+2) = 3; return *ary + *(ary+1) + *(ary+2);}'
 
 # for now, "int" is treated as 8 bytes
 try 8 'int main() { int x; return sizeof(x); }'
 try 8 'int main() { int x; return sizeof(x); }'
 try 8 'int main() { int *x; return sizeof x; }'
 try 32 'int main() { int x[4]; return sizeof x; }'
+
+try 5 'int main() { int x; int *p = &x; x = 5; return p[0];}'
+try 3 'int main() { int ary[2]; ary[0]=1; ary[1]=2; return ary[0] + ary[1];}'
