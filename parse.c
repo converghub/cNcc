@@ -244,6 +244,24 @@ static Node *assign() {
 }
 
 
+static Type *read_array(Type *cty) {
+    Vector *ary_size = new_vector();
+    while (consume('[')) {
+        Node *len = term();
+        if (len->ty != ND_NUM)
+            error("decl(): number expected.\n");
+        vec_push(ary_size, len);   
+        expect(']');
+    }
+    for (int i = ary_size->len - 1; i >= 0; i--) {
+        Node *len_node = ary_size->data[i];
+        cty = ary_of(cty, len_node->val);
+    }
+
+    return cty;
+}
+
+
 static Node* decl(int CTYPE) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_VAR_DEF;
@@ -257,19 +275,8 @@ static Node* decl(int CTYPE) {
     node->name = GET_TK(tokens, pos)->name;
     pos++;
 
-    // Check array 
-    Vector *ary_size = new_vector();
-    while (consume('[')) {
-        Node *len = term();
-        if (len->ty != ND_NUM)
-            error("decl(): number expected.\n");
-        vec_push(ary_size, len);   
-        expect(']');
-    }
-    for (int i = ary_size->len - 1; i >= 0; i--) {
-        Node *len_node = ary_size->data[i];
-        node->cty = ary_of(node->cty, len_node->val);
-    }
+    // Check & read array
+   node->cty = read_array(node->cty);
 
     // Set stacksize
     stacksize += size_of(node->cty);  
