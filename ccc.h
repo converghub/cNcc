@@ -139,8 +139,9 @@ void map_put(Map *map, char *key, void *val);
 void *map_get(Map *map, char *key);
 bool map_exist(Map *map, char *key);
 Type *ptr_of (Type *base);
-int size_of(Type *ctype);
+int size_of(Type *cty);
 Type *ary_of(Type *base, int len);
+Node *addr_of(Node *base, Type *cty);
 
 // codegen.c
 void gen(Node *node, ...);

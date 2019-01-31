@@ -258,7 +258,7 @@ static Node* decl(int CTYPE) {
     }
 
     // Set stacksize
-    stacksize += 8;
+    stacksize += size_of(node->cty);  
     Var *var = malloc(sizeof(Var));
     var->offset = stacksize;
     var->cty = node->cty;
@@ -384,8 +384,8 @@ static Node *function() {
             error("function(): Argument type expected, but got %s.\n", GET_TK(tokens, pos)->input);
 
         if (!map_exist(vars, ((Node *)node->args->data[argc])->name)) {
-            stacksize += 8;
             ((Node *)node->args->data[argc])->cty = ctype(TK_INT);
+            stacksize += size_of( ((Node *)node->args->data[argc])->cty );
             Var *var = malloc(sizeof(Var));
             var->cty = ((Node *)node->args->data[argc])->cty;
             var->offset = stacksize;

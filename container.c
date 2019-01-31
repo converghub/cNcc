@@ -84,7 +84,7 @@ Type *ary_of(Type *base, int len) {
 
 int size_of(Type *cty) {
     if (cty->ty == INT) 
-        return 4;
+        return 8;
     else if (cty->ty == PTR)
         return 8;
     else if (cty->ty == ARY)
@@ -93,6 +93,15 @@ int size_of(Type *cty) {
         error("size_of(): invalid ty value.\n");
         return 0;
 }
+
+Node *addr_of(Node *base, Type *cty) {
+    Node *node = malloc(sizeof(Node));
+    node->ty = ND_ADDR;
+    node->cty = ptr_of(cty);
+    node->rhs = base;
+    return node;
+}
+
 
 /* test functions */ 
 

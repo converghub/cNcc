@@ -8,9 +8,9 @@ static int label_counter = 0;
 
 // gen
 static void gen_lval(Node *node) {
-    if (node->ty == ND_DEREF)
+    if (node->ty == ND_DEREF) {
         return gen(node->rhs);
-
+    }
     if (node->ty != ND_IDENT && node->ty != ND_VAR_DEF && node->ty != ND_ADDR)
         error("gen_lval(): not a lvalue.");
 
@@ -23,6 +23,7 @@ static void gen_lval(Node *node) {
     printf("    mov rax, rbp\n");
     printf("    sub rax, %d\n", var->offset);
     printf("    push rax\n");
+    return;
 }
 
 void gen(Node *node, ...) {
@@ -33,11 +34,8 @@ void gen(Node *node, ...) {
         printf(".global %s\n", node->name);
         printf("%s:\n", node->name);
         // Prologue.
-        printf("    push rbx\n");
         printf("    push rbp\n");
         printf("    mov rbp, rsp\n");
-        printf("    mov rbx, rsp\n");
-        printf("    and rsp, ~0x0f\n");
 
         // 関数内の変数領域確保
         printf("    sub rsp, %d\n", node->stacksize);
@@ -54,13 +52,12 @@ void gen(Node *node, ...) {
             gen(node->body->stmts->data[i], node);
         }
 
-        // Epilogue
         printf(".%s_end:\n", node->name);
         // pop this value so the stack in not overflown
         printf("    pop rax\n");
+        // Epilogue        
         printf("    mov rsp, rbp\n");
         printf("    pop rbp\n");
-        printf("    pop rbx\n");
         printf("    ret\n");
         return;
     }
@@ -145,6 +142,7 @@ void gen(Node *node, ...) {
 
     if (node->ty == ND_IDENT) {
         gen_lval(node);
+        if (node->cty->ty == ARY) return;
         printf("    pop rax\n");
         printf("    mov rax, [rax]\n");
         printf("    push rax\n");
@@ -172,10 +170,7 @@ void gen(Node *node, ...) {
             printf("    pop %s\n", args[i]);
         }
 
-        printf("    mov rbx, rsp\n");
-        printf("    and rsp, ~0x0f\n");
         printf("    call %s\n", node->name);
-        printf("    mov rsp, rbx\n");
         printf("    push rax\n");
         return;
     }
@@ -224,12 +219,12 @@ void gen(Node *node, ...) {
 
     int flag = 0;
     if (node->rhs->cty != NULL) {
-        if (node->rhs->cty->ty == PTR) {
+        if (node->rhs->cty->ty == PTR || node->rhs->cty->ty == ARY) {
             flag = 1;  
         }
     }
     if (node->lhs->cty != NULL) {
-        if (node->lhs->cty->ty == PTR) {
+        if (node->lhs->cty->ty == PTR || node->lhs->cty->ty == ARY) {
             flag = 2;
         }
     }
@@ -238,13 +233,13 @@ void gen(Node *node, ...) {
         case '+':
             if (flag == 1) {
                 printf("    push rdi\n");
-                printf("    mov rdi, %d\n",  size_of(node->rhs->cty->ptrof));
+                printf("    mov rdi, %d\n",  8);
                 printf("    mul rdi\n");
                 printf("    pop rdi\n");                
             } else if (flag == 2) {
                 printf("    push rax\n");
                 printf("    mov rax, rdi\n");
-                printf("    mov rdi, %d\n",  size_of(node->lhs->cty->ptrof));
+                printf("    mov rdi, %d\n",  8);
                 printf("    mul rdi\n");
                 printf("    mov rdi, rax\n");
                 printf("    pop rax\n");
@@ -257,7 +252,7 @@ void gen(Node *node, ...) {
             } else if (flag == 2) {
                 printf("    push rax\n");
                 printf("    mov rax, rdi\n");
-                printf("    mov rdi, %d\n",  size_of(node->lhs->cty->ptrof));
+                printf("    mov rdi, %d\n",  8);
                 printf("    mul rdi\n");
                 printf("    mov rdi, rax\n");
                 printf("    pop rax\n");                
