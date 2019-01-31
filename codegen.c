@@ -3,6 +3,8 @@
 // parse.c
 extern Map *vars;
 
+static Vector *globals;
+
 static char *args[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 static int label_counter = 0;
 
@@ -20,9 +22,15 @@ static void gen_lval(Node *node) {
 
     Var *var = map_get(vars, node->name);
     node->cty = var->cty;
-    printf("    mov rax, rbp\n");
-    printf("    sub rax, %d\n", var->offset);
-    printf("    push rax\n");
+
+    if (var->is_local) {
+        printf("    mov rax, rbp\n");
+        printf("    sub rax, %d\n", var->offset);
+        printf("    push rax\n");        
+    } else {
+        printf("    lea rax, %s\n", var->name);
+        printf("    push rax\n");
+    }
     return;
 }
 
@@ -297,11 +305,49 @@ void gen(Node *node, ...) {
     printf("    push rax\n");
 }
 
+
+static char *escape(char *s, int len) {
+  char *buf = malloc(len * 4);
+  char *p = buf;
+  for (int i = 0; i < len; i++) {
+    if (s[i] == '\\') {
+      *p++ = '\\';
+      *p++ = '\\';
+    } else if (isgraph(s[i]) || s[i] == ' ') {
+      *p++ = s[i];
+    } else {
+      sprintf(p, "\\%03o", s[i]);
+      p += 4;
+    }
+  }
+  *p = '\0';
+  return buf;
+}
+
 void gen_code(Vector *code) {
     printf(".intel_syntax noprefix\n");
 
-    // 先頭からコード生成
+    // Global variables
+    printf(".data\n");
+
+    globals = new_vector();
+    int globals_counter = 0;
     for (int i = 0; i < code->len; i++) {
+        if (((Node *)code->data[i])->ty == ND_VAR_DEF) {
+            Node *node = code->data[i];
+            Var *var = map_get(vars, node->name);
+            printf("%s:\n", node->name);
+            printf("%s:\n", var->name);
+            printf("  .ascii \"%s\"\n", escape(var->data, var->len));
+        } else
+            continue;
+    }
+
+    // Functions
+    printf(".text\n");
+    for (int i = 0; i < code->len; i++) {
+        if (((Node *)code->data[i])->ty == ND_VAR_DEF) 
+            continue;
         gen(code->data[i]);
     }
 

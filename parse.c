@@ -5,6 +5,7 @@
 static Vector *tokens;
 static int pos;
 static int stacksize;
+static int globals_counter;
 static Type int_cty = {INT, NULL};
 
 // for codegen.c
@@ -56,6 +57,17 @@ static Node *new_node_ident(char *name) {
     node->ty = ND_IDENT;
     node->name = name;
     return node;    
+}
+
+
+static Var *new_global(Type *cty, char *data, int len, int counter) {
+    Var *var = malloc(sizeof(Var));
+    var->cty = cty;
+    var->is_local = false;
+    var->name = format(".G.str%d", counter);
+    var->data = data;
+    var->len = len;
+    return var;
 }
 
 
@@ -283,6 +295,7 @@ static Node* decl(int CTYPE) {
     Var *var = malloc(sizeof(Var));
     var->offset = stacksize;
     var->cty = node->cty;
+    var->is_local = true;
     map_put(vars, node->name, var);
 
     // Check initializer
@@ -381,50 +394,65 @@ static Node *cmpd_stmt() {
 }
 
 
-static Node *function() {
-    Node *node = malloc(sizeof(Node));
-    node->ty = ND_FUNC_DEF;
-    node->args = new_vector();
+static Node *top() {
     stacksize = 0;
+    Node *node = malloc(sizeof(Node));
 
     if (GET_TK(tokens, pos)->ty != TK_INT) 
-        error("function-return type expected, but got %s", GET_TK(tokens, pos)->input);
+        error("type name expected, but got %s", GET_TK(tokens, pos)->input);
     pos++;
 
     if (GET_TK(tokens, pos)->ty != TK_IDENT)
-        error("function() : Name expected, but got %s\n", GET_TK(tokens, pos)->input);
+        error("top() : Name expected, but got %s\n", GET_TK(tokens, pos)->input);
     node->name = GET_TK(tokens, pos)->name;
     pos++;
 
-    expect('(');
-    int argc = 0;
-    while (GET_TK(tokens, pos)->ty != (')')) {
-        if (consume(TK_INT))
-            vec_push(node->args, term());
-        else
-            error("function(): Argument type expected, but got %s.\n", GET_TK(tokens, pos)->input);
+    // Function
+    if (consume('(')) {
+        node->ty = ND_FUNC_DEF;
+        node->args = new_vector();
 
-        if (!map_exist(vars, ((Node *)node->args->data[argc])->name)) {
-            ((Node *)node->args->data[argc])->cty = ctype(TK_INT);
-            stacksize += size_of( ((Node *)node->args->data[argc])->cty );
-            Var *var = malloc(sizeof(Var));
-            var->cty = ((Node *)node->args->data[argc])->cty;
-            var->offset = stacksize;
-            map_put(vars, ((Node *)node->args->data[argc++])->name, var);
-        }
+        int argc = 0;
+        while (GET_TK(tokens, pos)->ty != (')')) {
+            if (consume(TK_INT))
+                vec_push(node->args, term());
+            else
+                error("function(): Argument type expected, but got %s.\n", GET_TK(tokens, pos)->input);
 
-        if (consume(',')) {
-            if (GET_TK(tokens, pos)->ty == (')'))
-                error("function() ','が不適切な場所にあります\n") ;           
-            continue;
+            if (!map_exist(vars, ((Node *)node->args->data[argc])->name)) {
+                ((Node *)node->args->data[argc])->cty = ctype(TK_INT);
+                stacksize += size_of( ((Node *)node->args->data[argc])->cty );
+                Var *var = malloc(sizeof(Var));
+                var->cty = ((Node *)node->args->data[argc])->cty;
+                var->is_local = true;
+                var->offset = stacksize;
+                map_put(vars, ((Node *)node->args->data[argc++])->name, var);
+            }
+
+            if (consume(',')) {
+                if (GET_TK(tokens, pos)->ty == (')'))
+                    error("function() ','が不適切な場所にあります\n") ;           
+                continue;
+            }
         }
+        expect(')');
+        expect('{');
+        node->body = cmpd_stmt();
+        expect('}');
+    return node;
     }
-    expect(')');
 
-    expect('{');
-    node->body = cmpd_stmt();
-    expect('}');
+    // Global variable
+    Type *cty = ctype(TK_INT);
+    node->ty = ND_VAR_DEF;
+    node->cty = read_array(cty);
+    node->data = malloc(size_of(node->cty));
+    node->len = size_of(node->cty);
 
+    Var *var = new_global(node->cty, node->data, node->len, globals_counter++);
+    map_put(vars, node->name, var);
+
+    expect(';');
     return node;
 }
 
@@ -434,9 +462,10 @@ Vector *parse(Vector *tk) {
     Vector *v = new_vector();
     vars = new_map();
     int func_counter = 0;
+    globals_counter = 0;
 
     while (GET_TK(tokens, pos)->ty != TK_EOF) {
-        vec_push(v, function());
+        vec_push(v, top());
         ((Node* )v->data[func_counter++])->stacksize = stacksize;
     }
     return v;

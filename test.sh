@@ -126,3 +126,8 @@ try 32 'int main() { int x[4]; return sizeof x; }'
 try 5 'int main() { int x; int *p = &x; x = 5; return p[0];}'
 try 3 'int main() { int ary[2]; ary[0]=1; ary[1]=2; return ary[0] + ary[1];}'
 try 3 'int main() { int ary[2]; ary[0]=1; ary[1]=2; return ary[0] + ary[1*1*1+1*1+0-1];}'
+
+try 0 'int x; int main() { return x; }'
+try 5 'int x; int main() { x = 5; return x; }'
+try 40 'int x[5]; int main() { return sizeof(x); }'
+try 15 'int x[5]; int main() { x[0] = 5; x[4] = 10; return x[0] + x[4]; }'

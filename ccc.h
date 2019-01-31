@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -70,8 +71,16 @@ typedef struct Type {
 
 // Var
 typedef struct {
-  Type *cty;
-  int offset;
+    Type *cty;
+    bool is_local;
+
+    // for local
+    int offset;
+
+    // for global
+    char *name;
+    char *data;
+    int len;
 } Var;
 
 
@@ -114,6 +123,10 @@ typedef struct Node {
     struct Node *init;
     struct Node *inc;
 
+    // Global variable
+    char *data;
+    int len;
+
     // If
     struct Node *bl_expr;
     struct Node *tr_stmt;
@@ -130,6 +143,7 @@ Vector *tokenize(char *p);
 
 // container.c
 void error(char *fmt, ...);
+char *format(char *fmt, ...);
 void run_test();
 Vector *new_vector();
 void vec_push(Vector *vec, void *elem);
