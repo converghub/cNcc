@@ -41,8 +41,6 @@ long **alloc_ptr_ptr(long x) {
 }
 EOF
 
-try 11 'int main(){int b; b=1; while (11+1>b+1) b=b+1; return b;}'
-try 11 'int main(){int a; a=1; while (a+1<11+1) a=a+1; return a;}'
 try 21 'int main() { 5+20-4;}'
 try 41 "int main() {12 + 34 - 5;}"
 try 47 "int main() {5+6*7;}"
@@ -84,7 +82,7 @@ try 0 'int main() { return 0<0; }'
 try 0 'int main() { return 0>0; }'
 
 try 11 'int main(){int a; a=1; while (a<11) a=a+1; return a;}'
-try 11 'int main(){int a; a=1; while (a+1<11+1) a=a+1; return a;}'
+try 11 'int main(){int b; b=1; while (11+1>b+1) b=b+1; return b;}'
 try 11 'int main(){int a; a=1; while (a+1<11+1) a=a+1; return a;}'
 try 11 'int main(){int a; a=1; while (a<11) {a=a+2;a=a-1;} return a;}'
 
@@ -134,3 +132,12 @@ try 0 'int x; int main() { return x; }'
 try 5 'int x; int main() { x = 5; return x; }'
 try 20 'int x[5]; int main() { return sizeof(x); }'
 try 15 'int x[5]; int main() { x[0] = 5; x[4] = 10; return x[0] + x[4]; }'
+
+try 2 "int main() {char a=4; return a/2;}"
+try 14 "int main() {char a=3;char b=5*6-8; return a+b/2;}"
+try 42 'int main() { int x = 0; char *p = &x; p[1] = 0;  p[0] = 42; return x; }'
+try 1 'int main() { char x; return sizeof x; }'
+try 1 'int main(char x) { return sizeof(x); }'
+try 2 'int main() { char x = 1; return x+1; }'
+try 4 "int main() {char a; char b;a=b=2;a+b;}"
+try 10 "int main() {char a[4]; for(int i=0; i < sizeof(a); i=i+1){ a[i]=i+1; } return a[0]+a[1]+a[2]+a[3];}"

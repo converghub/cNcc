@@ -5,6 +5,7 @@ extern Map *vars;
 
 static Vector *globals;
 
+static char *args_reg8[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
 static char *args_reg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
 static char *args_reg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 static int label_counter = 0;
@@ -53,8 +54,11 @@ void gen(Node *node, ...) {
         for (int j = 0; j < node->args->len; j++) {
             gen_lval(node->args->data[j]);
             printf("    pop rax\n");
-            if( size_of(((Node *)node->args->data[j])->cty) == 4 )
+            int data_size = size_of(((Node *)node->args->data[j])->cty);
+            if (data_size == 4)
                 printf("    mov [rax], %s\n", args_reg32[j]);
+            else if (data_size == 1)
+                printf("    mov [rax], %s\n", args_reg8[j]);
             else
                 printf("    mov [rax], %s\n", args_reg64[j]);
         }
@@ -156,9 +160,13 @@ void gen(Node *node, ...) {
         gen_lval(node);
         if (node->cty->ty == ARY) return;
         printf("    pop rax\n");
-        if (size_of(node->cty) == 4) 
-            printf("    mov eax, [rax]\n");
-        else
+        if (size_of(node->cty) == 4) {
+            printf("    mov eax, [rax]\n");            
+        }
+        else if (size_of(node->cty) == 1) {
+            printf("    mov al, [rax]\n");
+            printf("    and rax, 0xFF\n");
+        } else
             printf("    mov rax, [rax]\n");
         printf("    push rax\n");
         return;
@@ -174,6 +182,8 @@ void gen(Node *node, ...) {
 
         if(size_of(node->cty) == 4) 
             printf("    mov [rax], edi\n");
+        else if (size_of(node->cty) == 1)
+            printf("    mov [rax], dil\n");
         else
             printf("    mov [rax], rdi\n");
         printf("    push rdi\n");
@@ -207,14 +217,16 @@ void gen(Node *node, ...) {
             printf("    mov [rax], rdi\n");
             printf("    push rdi\n");
             return;
+        } else {
+            if(size_of(node->lhs->cty) == 4) 
+                printf("    mov [rax], edi\n");
+            else if (size_of(node->lhs->cty) == 1)
+                printf("    mov [rax], dil\n");
+            else
+                printf("    mov [rax], rdi\n");
+            printf("    push rdi\n");
+            return;
         }
-
-        if(size_of(node->lhs->cty) == 4) 
-            printf("    mov [rax], edi\n");
-        else
-            printf("    mov [rax], rdi\n");
-        printf("    push rdi\n");
-        return;
     }
 
     if (node->ty == ND_DEREF) {
