@@ -31,6 +31,7 @@ enum {
     TK_SIZEOF,      // "sizeof"
     TK_IDENT,       // Identifier
     TK_INT,         // "int"
+    TK_CHAR,        // "char"
     TK_IF,          // if
     TK_ELSE,        // else
     TK_WHILE,       // while
@@ -53,6 +54,7 @@ typedef struct {
 // Pointer
 enum {
     INT,
+    CHAR,
     PTR,
     ARY,
 };
@@ -154,6 +156,7 @@ bool map_exist(Map *map, char *key);
 Type *ptr_of (Type *base);
 int size_of(Type *cty);
 Type *ary_of(Type *base, int len);
+Type *ctype_of_ary(Type *cty);
 Node *addr_of(Node *base, Type *cty);
 
 // codegen.c

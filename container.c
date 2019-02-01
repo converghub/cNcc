@@ -92,9 +92,17 @@ Type *ary_of(Type *base, int len) {
     return cty;
 }
 
+Type *ctype_of_ary(Type *cty) {
+    if (cty->aryof)
+        return ctype_of_ary(cty->aryof);
+    return cty;
+}
+
 int size_of(Type *cty) {
-    if (cty->ty == INT) 
-        return 8;
+    if (cty->ty == CHAR)
+        return 1;
+    else if (cty->ty == INT) 
+        return 4;
     else if (cty->ty == PTR)
         return 8;
     else if (cty->ty == ARY)

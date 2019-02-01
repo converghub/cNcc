@@ -1,4 +1,5 @@
 #include "ccc.h"
+#define SYMBOL_NUMBER (sizeof symbols)/(sizeof (struct symbol))
 
 Map *keywords;
 
@@ -11,14 +12,12 @@ static Token *add_token(Vector *v, int ty, char *input) {
 }
 
 
-static struct {
+static struct symbol{
     char *name;
     int ty;
 } symbols[] = {
     {"==", TK_EQ}, {"!=", TK_NE}, {"&&", TK_LAND}, {"||", TK_LOR}
 };
-
-
 
 
 // pが指している文字列をトークンに分割してtokensに保存する
@@ -30,6 +29,7 @@ Vector *tokenize(char *p) {
     map_put(keywords, "while", (void *)TK_WHILE);
     map_put(keywords, "for", (void *)TK_FOR);
     map_put(keywords, "int", (void *)TK_INT);
+    map_put(keywords, "char", (void *)TK_CHAR);
     map_put(keywords, "sizeof", (void * )TK_SIZEOF);
 
     Vector *v = new_vector();
@@ -43,12 +43,13 @@ loop:
         }
 
         // Multi-letter symbol/keyword
-        for (int i = 0; symbols[i].name; i++) {
+        for (int i = 0; i < SYMBOL_NUMBER; i++) {
             char *name = symbols[i].name;
             int len = strlen(name);
-            if (strncmp(p, name, len))
+            if (strncmp(p, name, len)) {
                 continue;
-            
+            }
+
             add_token(v, symbols[i].ty, p);
             p += len;
             goto loop;

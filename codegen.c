@@ -5,7 +5,8 @@ extern Map *vars;
 
 static Vector *globals;
 
-static char *args[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+static char *args_reg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
+static char *args_reg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 static int label_counter = 0;
 
 // gen
@@ -52,7 +53,10 @@ void gen(Node *node, ...) {
         for (int j = 0; j < node->args->len; j++) {
             gen_lval(node->args->data[j]);
             printf("    pop rax\n");
-            printf("    mov [rax], %s\n", args[j]);
+            if( size_of(((Node *)node->args->data[j])->cty) == 4 )
+                printf("    mov [rax], %s\n", args_reg32[j]);
+            else
+                printf("    mov [rax], %s\n", args_reg64[j]);
         }
 
         // Body
@@ -152,7 +156,10 @@ void gen(Node *node, ...) {
         gen_lval(node);
         if (node->cty->ty == ARY) return;
         printf("    pop rax\n");
-        printf("    mov rax, [rax]\n");
+        if (size_of(node->cty) == 4) 
+            printf("    mov eax, [rax]\n");
+        else
+            printf("    mov rax, [rax]\n");
         printf("    push rax\n");
         return;
     }
@@ -164,7 +171,11 @@ void gen(Node *node, ...) {
         gen(node->init);
         printf("    pop rdi\n");
         printf("    pop rax\n");
-        printf("    mov [rax], rdi\n");
+
+        if(size_of(node->cty) == 4) 
+            printf("    mov [rax], edi\n");
+        else
+            printf("    mov [rax], rdi\n");
         printf("    push rdi\n");
         return;
     }
@@ -175,7 +186,7 @@ void gen(Node *node, ...) {
         }
 
         for (int i = node->args->len - 1; i >= 0; i--) {
-            printf("    pop %s\n", args[i]);
+            printf("    pop %s\n", args_reg64[i]);
         }
 
         printf("    call %s\n", node->name);
@@ -190,7 +201,18 @@ void gen(Node *node, ...) {
 
         printf("    pop rdi\n");
         printf("    pop rax\n");
-        printf("    mov [rax], rdi\n");
+
+        if(node->lhs->cty == NULL) {
+            // Ary
+            printf("    mov [rax], rdi\n");
+            printf("    push rdi\n");
+            return;
+        }
+
+        if(size_of(node->lhs->cty) == 4) 
+            printf("    mov [rax], edi\n");
+        else
+            printf("    mov [rax], rdi\n");
         printf("    push rdi\n");
         return;
     }
@@ -241,13 +263,23 @@ void gen(Node *node, ...) {
         case '+':
             if (flag == 1) {
                 printf("    push rdi\n");
-                printf("    mov rdi, %d\n",  8);
+                int coeff = 0;
+                if (node->rhs->cty->ty == ARY) 
+                    coeff = size_of(ctype_of_ary(node->rhs->cty));
+                else
+                    coeff = size_of(node->rhs->cty->ptrof);
+                printf("    mov rdi, %d\n", coeff);
                 printf("    mul rdi\n");
                 printf("    pop rdi\n");                
             } else if (flag == 2) {
                 printf("    push rax\n");
                 printf("    mov rax, rdi\n");
-                printf("    mov rdi, %d\n",  8);
+                int coeff = 0;
+                if (node->lhs->cty->ty == ARY) 
+                    coeff = size_of(ctype_of_ary(node->lhs->cty));
+                else
+                    coeff = size_of(node->lhs->cty->ptrof);                
+                printf("    mov rdi, %d\n", coeff);
                 printf("    mul rdi\n");
                 printf("    mov rdi, rax\n");
                 printf("    pop rax\n");
@@ -260,7 +292,12 @@ void gen(Node *node, ...) {
             } else if (flag == 2) {
                 printf("    push rax\n");
                 printf("    mov rax, rdi\n");
-                printf("    mov rdi, %d\n",  8);
+                int coeff = 0;
+                if (node->lhs->cty->ty == ARY) 
+                    coeff = size_of(ctype_of_ary(node->lhs->cty));
+                else
+                    coeff = size_of(node->lhs->cty->ptrof);  
+                printf("    mov rdi, %d\n",  coeff);
                 printf("    mul rdi\n");
                 printf("    mov rdi, rax\n");
                 printf("    pop rax\n");                
@@ -284,12 +321,6 @@ void gen(Node *node, ...) {
             printf("    setne al\n");
             printf("    movzb rax, al\n"); 
             break;
-        case ND_LAND:
-            printf("    and rax, rdi\n");
-            break;
-        case ND_LOR:
-            printf("    or rax, rdi\n");
-            break;
         case '>':
             printf("    cmp rax, rdi\n");
             printf("    setg al\n");
@@ -299,6 +330,12 @@ void gen(Node *node, ...) {
             printf("    cmp rax, rdi\n");
             printf("    setl al\n");
             printf("    movzb rax, al\n");
+            break;
+        case ND_LAND:
+            printf("    and rax, rdi\n");
+            break;
+        case ND_LOR:
+            printf("    or rax, rdi\n");
             break;
     }
 
@@ -331,7 +368,6 @@ void gen_code(Vector *code) {
     printf(".data\n");
 
     globals = new_vector();
-    int globals_counter = 0;
     for (int i = 0; i < code->len; i++) {
         if (((Node *)code->data[i])->ty == ND_VAR_DEF) {
             Node *node = code->data[i];

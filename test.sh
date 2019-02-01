@@ -17,15 +17,15 @@ try() {
 }
 
 cat <<EOF | gcc -xc -c -o tmp-test.o -
-long plus(long x, long y) { return x + y; }
-long *alloc1(long x, long y) {
-  static long arr[2];
+int plus(int x, int y) { return x + y; }
+int *alloc1(int x, int y) {
+  static int arr[2];
   arr[0] = x;
   arr[1] = y;
   return arr;
 }
-long *alloc2(long x, long y) {
-  static long arr[2];
+int *alloc2(int x, int y) {
+  static int arr[2];
   arr[0] = x;
   arr[1] = y;
   return arr + 1;
@@ -41,6 +41,8 @@ long **alloc_ptr_ptr(long x) {
 }
 EOF
 
+try 11 'int main(){int b; b=1; while (11+1>b+1) b=b+1; return b;}'
+try 11 'int main(){int a; a=1; while (a+1<11+1) a=a+1; return a;}'
 try 21 'int main() { 5+20-4;}'
 try 41 "int main() {12 + 34 - 5;}"
 try 47 "int main() {5+6*7;}"
@@ -82,6 +84,8 @@ try 0 'int main() { return 0<0; }'
 try 0 'int main() { return 0>0; }'
 
 try 11 'int main(){int a; a=1; while (a<11) a=a+1; return a;}'
+try 11 'int main(){int a; a=1; while (a+1<11+1) a=a+1; return a;}'
+try 11 'int main(){int a; a=1; while (a+1<11+1) a=a+1; return a;}'
 try 11 'int main(){int a; a=1; while (a<11) {a=a+2;a=a-1;} return a;}'
 
 try 60 'int main() {int sum=0; for (int i=10; i<15; i=i+1) sum = sum + i; return sum;}'
@@ -117,11 +121,10 @@ try 3 'int main() { int a[2]; *a=1; *(1+a)=2; return *a+*(a+1);}'
 try 3 'int main() { int a[2]; *a=1; *(a+1)=2; int *p; p=a; return *p+*(p+1);}'
 try 6 'int main() { int ary[3]; *ary=1; *(ary+1)=2; *(ary+2) = 3; return *ary + *(ary+1) + *(ary+2);}'
 
-# for now, "int" is treated as 8 bytes
-try 8 'int main() { int x; return sizeof(x); }'
-try 8 'int main() { int x; return sizeof(x); }'
+try 4 'int main() { int x; return sizeof(x); }'
+try 4 'int main() { int x; return sizeof(x); }'
 try 8 'int main() { int *x; return sizeof x; }'
-try 32 'int main() { int x[4]; return sizeof x; }'
+try 16 'int main() { int x[4]; return sizeof x; }'
 
 try 5 'int main() { int x; int *p = &x; x = 5; return p[0];}'
 try 3 'int main() { int ary[2]; ary[0]=1; ary[1]=2; return ary[0] + ary[1];}'
@@ -129,5 +132,5 @@ try 3 'int main() { int ary[2]; ary[0]=1; ary[1]=2; return ary[0] + ary[1*1*1+1*
 
 try 0 'int x; int main() { return x; }'
 try 5 'int x; int main() { x = 5; return x; }'
-try 40 'int x[5]; int main() { return sizeof(x); }'
+try 20 'int x[5]; int main() { return sizeof(x); }'
 try 15 'int x[5]; int main() { x[0] = 5; x[4] = 10; return x[0] + x[4]; }'
