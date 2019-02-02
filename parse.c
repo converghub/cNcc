@@ -9,6 +9,7 @@ static Vector *strings;
 static int globals_counter;
 static Type int_cty = {INT, NULL};
 static Type char_cty = {CHAR, NULL};
+static Node null_stmt = {ND_NULL};
 
 // for codegen.c
 Map *vars;
@@ -396,7 +397,8 @@ static Node *stmt() {
             node->body = stmt();
         }
         return node;
-
+    } else if (consume(';')) {
+        return &null_stmt;
     } else {
         node = assign();
         expect(';');

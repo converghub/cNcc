@@ -152,3 +152,5 @@ try 98 'int main() { char *p = "abc"; char *q = "def"; return p[1]; }'
 try 99 'int main() { char *p = "abc"; char *q = "def"; return p[2]; }'
 
 try 5 'extern int global_arr[1]; int main() { return global_arr[0]; }'
+
+try 1 'int main() {; return 1;}'

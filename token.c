@@ -1,7 +1,6 @@
 #include "ccc.h"
 #define SYMBOL_NUMBER (sizeof symbols)/(sizeof (struct symbol))
 
-Map *keywords;
 
 static Token *add_token(Vector *v, int ty, char *input) {
     Token *t = malloc(sizeof(Token));
@@ -16,23 +15,16 @@ static struct symbol{
     char *name;
     int ty;
 } symbols[] = {
-    {"==", TK_EQ}, {"!=", TK_NE}, {"&&", TK_LAND}, {"||", TK_LOR}
+    {"==", TK_EQ},         {"!=", TK_NE},       {"&&", TK_LAND}, 
+    {"||", TK_LOR},        {"if", TK_IF},       {"else", TK_ELSE},
+    {"return", TK_RETURN}, {"while", TK_WHILE}, {"for", TK_FOR},
+    {"int", TK_INT},       {"char", TK_CHAR},   {"sizeof", TK_SIZEOF},
+    {"extern", TK_EXTERN}, 
 };
 
 
-// pが指している文字列をトークンに分割してtokensに保存する
+// Tokenize input 
 Vector *tokenize(char *p) {
-    keywords = new_map();
-    map_put(keywords, "if", (void *)TK_IF);
-    map_put(keywords, "else", (void *)TK_ELSE);
-    map_put(keywords, "return", (void *)TK_RETURN);
-    map_put(keywords, "while", (void *)TK_WHILE);
-    map_put(keywords, "for", (void *)TK_FOR);
-    map_put(keywords, "int", (void *)TK_INT);
-    map_put(keywords, "char", (void *)TK_CHAR);
-    map_put(keywords, "sizeof", (void * )TK_SIZEOF);
-    map_put(keywords, "extern", (void *)TK_EXTERN);
-
     Vector *v = new_vector();
 
 loop:
@@ -79,19 +71,14 @@ loop:
             continue;
         }
 
-        // Keyword
+        // Identifier
         if (isalpha(*p) || *p == '_') {
             int len = 1;
             while (isalpha(p[len]) || isdigit(p[len]) || p[len] == '_' )
                 len++;
-            
-            char *name = strndup(p, len);
-            int ty = (intptr_t)map_get(keywords, name);
-            if (!ty)
-                ty = TK_IDENT;
 
-            Token *t = add_token(v, ty, p);
-            t->name = name;
+            Token *t = add_token(v, TK_IDENT, p);
+            t->name = strndup(p, len);
             p += len;
             continue;
         }

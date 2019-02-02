@@ -38,6 +38,8 @@ void gen(Node *node, ...) {
     va_list parent_func;
     va_start(parent_func, node);
 
+    if (node->ty == ND_NULL)
+        return;
     if (node->ty == ND_FUNC_DEF) {
         printf(".global %s\n", node->name);
         printf("%s:\n", node->name);

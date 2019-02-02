@@ -110,6 +110,7 @@ enum {
     ND_NE,          // Not-equal operation : !=
     ND_LOR,         // Logical OR operation : ||
     ND_LAND,        // Logical AND operation : &&
+    ND_NULL,        // Null statement
 };
 
 typedef struct Node {
