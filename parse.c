@@ -5,6 +5,7 @@
 static Vector *tokens;
 static int pos;
 static int stacksize;
+static Vector *strings;
 static int globals_counter;
 static Type int_cty = {INT, NULL};
 static Type char_cty = {CHAR, NULL};
@@ -101,6 +102,17 @@ static Node *term() {
     if (GET_TK(tokens, pos)->ty == TK_NUM)
         return new_node_num(GET_TK(tokens, pos++)->val);
 
+    if (GET_TK(tokens, pos)->ty == TK_STR) {
+        Node *node = malloc(sizeof(Node));
+        node->ty = ND_STR;
+        node->cty = ary_of(&char_cty, strlen(GET_TK(tokens, pos)->str));
+        node->str = GET_TK(tokens, pos)->str;
+        node->name = format(".G.str%d", globals_counter++);
+        vec_push(strings, node);
+        pos++;
+        return node;
+    }
+
     if (GET_TK(tokens, pos)->ty == TK_IDENT) {
         if (GET_TK(tokens, pos + 1)->ty == '(') {
             // function
@@ -125,7 +137,7 @@ static Node *term() {
         return new_node_ident(GET_TK(tokens, pos++)->name);       
     }
 
-    error("term() 不適切なトークンです: %s", GET_TK(tokens, pos)->input);
+    error("term(): incorrect token %s", GET_TK(tokens, pos)->input);
     return NULL;
 }
 
@@ -406,6 +418,7 @@ static Node *cmpd_stmt() {
 
 static Node *top() {
     stacksize = 0;
+    strings = new_vector();
     Node *node = malloc(sizeof(Node));
 
     Type *cty = ctype();
@@ -450,6 +463,9 @@ static Node *top() {
         expect('{');
         node->body = cmpd_stmt();
         expect('}');
+    
+    // String literal
+    node->strings = strings;
     return node;
     }
 
@@ -472,11 +488,12 @@ Vector *parse(Vector *tk) {
     Vector *v = new_vector();
     vars = new_map();
     globals_counter = 0;
-    int func_counter = 0;
+    int toplevel_counter = 0;
 
     while (GET_TK(tokens, pos)->ty != TK_EOF) {
         vec_push(v, top());
-        ((Node* )v->data[func_counter++])->stacksize = stacksize;
+        ((Node* )v->data[toplevel_counter])->stacksize = stacksize;
+        toplevel_counter++;
     }
     return v;
 }

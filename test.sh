@@ -141,3 +141,11 @@ try 1 'int main(char x) { return sizeof(x); }'
 try 2 'int main() { char x = 1; return x+1; }'
 try 4 "int main() {char a; char b;a=b=2;a+b;}"
 try 10 "int main() {char a[4]; for(int i=0; i < sizeof(a); i=i+1){ a[i]=i+1; } return a[0]+a[1]+a[2]+a[3];}"
+
+try 97 'int main() { char *p = "abc";  return p[0]; }'
+try 98 'int main() { char *p = "abc"; return p[1]; }'
+try 99 'int main() { char *p = "abc"; return p[2]; }'
+try 0 'int main() { char *p = "abc"; return p[3]; }'
+try 97 'int main() { char *p = "abc"; char *q = "def"; return p[0]; }'
+try 98 'int main() { char *p = "abc"; char *q = "def"; return p[1]; }'
+try 99 'int main() { char *p = "abc"; char *q = "def"; return p[2]; }'

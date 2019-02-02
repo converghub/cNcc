@@ -42,6 +42,22 @@ loop:
             continue;
         }
 
+        // String literal
+        if (*p == '"') {
+            Token *t = add_token(v, TK_STR, p);
+            p++;
+
+            int len = 0;
+            while(p[len] && p[len] != '"')
+                len++;
+            if (!p[len])
+                error("tokenize(): incorrect end of string literal. %s", p);
+            t->str = strndup(p, len);
+            p = p + len;
+            p++;
+            continue;
+        }
+
         // Multi-letter symbol/keyword
         for (int i = 0; i < SYMBOL_NUMBER; i++) {
             char *name = symbols[i].name;
@@ -85,7 +101,7 @@ loop:
             continue;
         }
 
-        error("トークナイズできません: %s\n", p);
+        error("tokenize(): Cannot tokenize %s\n", p);
     }
 
     add_token(v, TK_EOF, p);

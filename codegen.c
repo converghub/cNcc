@@ -3,8 +3,6 @@
 // parse.c
 extern Map *vars;
 
-static Vector *globals;
-
 static char *args_reg8[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
 static char *args_reg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
 static char *args_reg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
@@ -153,6 +151,12 @@ void gen(Node *node, ...) {
 
     if (node->ty == ND_NUM) {
         printf("    push %d\n", node->val);
+        return;
+    }
+
+    if (node->ty == ND_STR) {
+        printf("    lea rax, %s\n", node->name);
+        printf("    push rax\n");
         return;
     }
 
@@ -376,23 +380,35 @@ static char *escape(char *s, int len) {
 void gen_code(Vector *code) {
     printf(".intel_syntax noprefix\n");
 
-    // Global variables
-    printf(".data\n");
 
-    globals = new_vector();
+    printf(".data\n");
+    // Global variable
     for (int i = 0; i < code->len; i++) {
-        if (((Node *)code->data[i])->ty == ND_VAR_DEF) {
-            Node *node = code->data[i];
+        Node *node = code->data[i];
+        if (node->ty == ND_VAR_DEF) {
             Var *var = map_get(vars, node->name);
             printf("%s:\n", node->name);
             printf("%s:\n", var->name);
-            printf("  .ascii \"%s\"\n", escape(var->data, var->len));
+            printf("    .ascii \"%s\"\n", escape(var->data, var->len));          
+        } else
+            continue;
+    }
+
+    printf(".text\n");
+    // String literal
+    for (int i = 0; i < code->len; i++) {
+        Node *node = code->data[i];
+        if (node->strings) {
+            for (int j = 0; j < node->strings->len; j++) {
+                Node *str = node->strings->data[j];
+                printf("%s:\n", str->name);
+                printf("    .asciz \"%s\"\n", str->str);
+            }
         } else
             continue;
     }
 
     // Functions
-    printf(".text\n");
     for (int i = 0; i < code->len; i++) {
         if (((Node *)code->data[i])->ty == ND_VAR_DEF) 
             continue;

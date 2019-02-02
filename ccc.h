@@ -27,6 +27,7 @@ typedef struct {
 // Token
 enum {
     TK_NUM = 256,   // Integer
+    TK_STR,         // String
     TK_RETURN,      // "return"
     TK_SIZEOF,      // "sizeof"
     TK_IDENT,       // Identifier
@@ -46,6 +47,7 @@ enum {
 typedef struct {
     int ty;
     int val;
+    char *str;      // String literal
     char *name;     // Identifier
     char *input;
 } Token;
@@ -89,6 +91,7 @@ typedef struct {
 // Node
 enum {
     ND_NUM = 256,   // Integer
+    ND_STR,         // String literal
     ND_RETURN,      // Return
     ND_SIZEOF,      // Sizeof
     ND_IDENT,       // Identifier
@@ -108,19 +111,21 @@ enum {
 };
 
 typedef struct Node {
-    int ty;              // Node type
-    Type *cty;           // C type
+    int ty;                 // Node type
+    Type *cty;              // C type
     struct Node *lhs;
     struct Node *rhs;
-    int val;             // for ND_NUM
-    char *name;          // for ND_IDENT
-    struct Node *expr;   // for ND_RETURN, ND_DEREF
-    Vector *stmts;       // for ND_CMPD_STMT
+    int val;                // for ND_NUM
+    char *str;              // for ND_STR
+    char *name;             // for ND_IDENT
+    struct Node *expr;      // for ND_RETURN, ND_DEREF
+    Vector *stmts;          // for ND_CMPD_STMT
 
     // Function
-    Vector *args;        // for Function call arguments
-    struct Node *body;   // for Function defenition
-    int stacksize;       // for Function stacksize
+    Vector *args;           // for Function call arguments
+    struct Node *body;      // for Function defenition
+    int stacksize;          // for Function stacksize
+    Vector *strings;        // for String literal
 
     struct Node *init;
     struct Node *inc;
