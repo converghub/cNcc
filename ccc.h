@@ -31,6 +31,7 @@ enum {
     TK_RETURN,      // "return"
     TK_SIZEOF,      // "sizeof"
     TK_IDENT,       // Identifier
+    TK_EXTERN,      // "extern"
     TK_INT,         // "int"
     TK_CHAR,        // "char"
     TK_IF,          // if
@@ -83,6 +84,7 @@ typedef struct {
 
     // for global
     char *name;
+    bool is_extern;
     char *data;
     int len;
 } Var;
@@ -131,6 +133,7 @@ typedef struct Node {
     struct Node *inc;
 
     // Global variable
+    bool is_extern;
     char *data;
     int len;
 

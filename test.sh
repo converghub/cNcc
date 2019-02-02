@@ -17,6 +17,7 @@ try() {
 }
 
 cat <<EOF | gcc -xc -c -o tmp-test.o -
+int global_arr[1] = {5};
 int plus(int x, int y) { return x + y; }
 int *alloc1(int x, int y) {
   static int arr[2];
@@ -149,3 +150,5 @@ try 0 'int main() { char *p = "abc"; return p[3]; }'
 try 97 'int main() { char *p = "abc"; char *q = "def"; return p[0]; }'
 try 98 'int main() { char *p = "abc"; char *q = "def"; return p[1]; }'
 try 99 'int main() { char *p = "abc"; char *q = "def"; return p[2]; }'
+
+try 5 'extern int global_arr[1]; int main() { return global_arr[0]; }'

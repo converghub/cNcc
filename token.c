@@ -31,6 +31,7 @@ Vector *tokenize(char *p) {
     map_put(keywords, "int", (void *)TK_INT);
     map_put(keywords, "char", (void *)TK_CHAR);
     map_put(keywords, "sizeof", (void * )TK_SIZEOF);
+    map_put(keywords, "extern", (void *)TK_EXTERN);
 
     Vector *v = new_vector();
 

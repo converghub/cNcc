@@ -387,7 +387,8 @@ void gen_code(Vector *code) {
         Node *node = code->data[i];
         if (node->ty == ND_VAR_DEF) {
             Var *var = map_get(vars, node->name);
-            printf("%s:\n", node->name);
+            if (var->is_extern)
+                continue;
             printf("%s:\n", var->name);
             printf("    .ascii \"%s\"\n", escape(var->data, var->len));          
         } else

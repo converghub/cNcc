@@ -72,11 +72,11 @@ static Node *new_node_ident(char *name) {
 }
 
 
-static Var *new_global(Type *cty, char *data, int len, int counter) {
+static Var *new_global(Type *cty, char *name, char *data, int len) {
     Var *var = malloc(sizeof(Var));
     var->cty = cty;
     var->is_local = false;
-    var->name = format(".G.str%d", counter);
+    var->name = name;
     var->data = data;
     var->len = len;
     return var;
@@ -417,6 +417,7 @@ static Node *cmpd_stmt() {
 
 
 static Node *top() {
+    bool is_extern = consume(TK_EXTERN);
     stacksize = 0;
     strings = new_vector();
     Node *node = malloc(sizeof(Node));
@@ -472,10 +473,16 @@ static Node *top() {
     // Global variable
     node->ty = ND_VAR_DEF;
     node->cty = read_array(cty);
-    node->data = malloc(size_of(node->cty));
-    node->len = size_of(node->cty);
+    if (is_extern) {
+        node->is_extern = true;
+    } else {
+        node->data = malloc(size_of(node->cty));
+        node->len = size_of(node->cty);
+        node->is_extern = false;
+    }
 
-    Var *var = new_global(node->cty, node->data, node->len, globals_counter++);
+    Var *var = new_global(node->cty, node->name, node->data, node->len);
+    var->is_extern = node->is_extern;
     map_put(vars, node->name, var);
 
     expect(';');
