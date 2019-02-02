@@ -378,6 +378,21 @@ static Node *stmt() {
         }
         return node;
 
+    } else if (consume(TK_DO)) {
+        node->ty = ND_DO_WHILE;
+        if(consume('{')) {
+            node->body = cmpd_stmt();
+            expect('}');
+        } else {
+            node->body = stmt();
+        }
+        expect(TK_WHILE);
+        expect('(');
+        node->bl_expr = assign();
+        expect(')');
+        expect(';');
+        return node;
+
     } else if (consume(TK_FOR)) {
         node->ty = ND_FOR;
         expect('(');

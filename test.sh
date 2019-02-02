@@ -86,6 +86,7 @@ try 11 'int main(){int a; a=1; while (a<11) a=a+1; return a;}'
 try 11 'int main(){int b; b=1; while (11+1>b+1) b=b+1; return b;}'
 try 11 'int main(){int a; a=1; while (a+1<11+1) a=a+1; return a;}'
 try 11 'int main(){int a; a=1; while (a<11) {a=a+2;a=a-1;} return a;}'
+try 45 'int main() { int x=0; int y=0; do { y=y+x; x=x+1; } while (x < 10); return y; }'
 
 try 60 'int main() {int sum=0; for (int i=10; i<15; i=i+1) sum = sum + i; return sum;}'
 try 60 'int main() {int sum=0; for (int i=10; i<15; i=i+1) {sum = sum + i; sum = sum + 0;} return sum;}'

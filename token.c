@@ -19,7 +19,7 @@ static struct symbol{
     {"||", TK_LOR},        {"if", TK_IF},       {"else", TK_ELSE},
     {"return", TK_RETURN}, {"while", TK_WHILE}, {"for", TK_FOR},
     {"int", TK_INT},       {"char", TK_CHAR},   {"sizeof", TK_SIZEOF},
-    {"extern", TK_EXTERN}, 
+    {"extern", TK_EXTERN}, {"do", TK_DO},
 };
 
 

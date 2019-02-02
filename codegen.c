@@ -126,6 +126,28 @@ void gen(Node *node, ...) {
         return;
     }
 
+    if (node->ty == ND_DO_WHILE) {
+        int do_while_label = label_counter++;
+        int do_while_end = label_counter++;        
+        printf(".do_while_%d:\n", do_while_label);
+
+        if (node->body->stmts != NULL) {
+            for (int i = 0; i < node->body->stmts->len; i++)
+                gen(node->body->stmts->data[i], va_arg(parent_func, Node*));
+        } else {
+            gen(node->body);
+        }
+
+        gen(node->bl_expr);
+        printf("    pop rax;\n");
+        printf("    cmp rax, 0\n");
+        printf("    je .do_while_end_%d\n", do_while_end);
+
+        printf("    jmp .do_while_%d\n", do_while_label);
+        printf(".do_while_end_%d:\n", do_while_end);
+        return;
+    }
+
     if (node->ty == ND_FOR) {
         int for_label = label_counter++;
         int for_end = label_counter++;

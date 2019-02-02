@@ -34,10 +34,11 @@ enum {
     TK_EXTERN,      // "extern"
     TK_INT,         // "int"
     TK_CHAR,        // "char"
-    TK_IF,          // if
-    TK_ELSE,        // else
-    TK_WHILE,       // while
-    TK_FOR,         // for
+    TK_IF,          // "if"
+    TK_ELSE,        // "else"
+    TK_DO,          // "do"
+    TK_WHILE,       // "while"
+    TK_FOR,         // "for"
     TK_EQ,          // ==
     TK_NE,          // !=
     TK_LOR,         // ||
@@ -94,13 +95,14 @@ typedef struct {
 enum {
     ND_NUM = 256,   // Integer
     ND_STR,         // String literal
-    ND_RETURN,      // Return
-    ND_SIZEOF,      // Sizeof
+    ND_RETURN,      // return
+    ND_SIZEOF,      // sizeof
     ND_IDENT,       // Identifier
     ND_VAR_DEF,     // Variable definition
-    ND_IF,          // If
-    ND_WHILE,       // While
-    ND_FOR,         // For
+    ND_IF,          // if
+    ND_WHILE,       // while
+    ND_DO_WHILE,    // do ~ while
+    ND_FOR,         // for
     ND_DEREF,       // Pointer dereference : *
     ND_ADDR,        // Address-of operater : &
     ND_CMPD_STMT,   // Compound statement
