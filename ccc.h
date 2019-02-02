@@ -123,7 +123,7 @@ typedef struct Node {
     int val;                // for ND_NUM
     char *str;              // for ND_STR
     char *name;             // for ND_IDENT
-    struct Node *expr;      // for ND_RETURN, ND_DEREF
+    struct Node *expr;      // for ND_RETURN, ND_DEREF, ND_SIZEOF
     Vector *stmts;          // for ND_CMPD_STMT
 
     // Function

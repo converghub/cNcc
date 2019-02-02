@@ -148,7 +148,7 @@ static Node *postfix() {
     while (consume('[')) {
         Node *node = malloc(sizeof(Node));
         node->ty = ND_DEREF;
-        node->rhs = new_node('+', lhs, assign());
+        node->expr = new_node('+', lhs, assign());
         lhs = node;
         expect(']');
     }
@@ -160,28 +160,28 @@ static Node *unary() {
     if (consume('*')) {
         Node *node = malloc(sizeof(Node));
         node->ty = ND_DEREF;
-        node->rhs = mul();
+        node->expr = mul();
         return node;
     }
     if (consume('&')) {
         Node *node = malloc(sizeof(Node));
         node->ty = ND_ADDR;
-        node->rhs = mul();
+        node->expr = mul();
         return node;
     }
     if (consume(TK_SIZEOF)) {
         Node *node = malloc(sizeof(Node));
         node->ty = ND_SIZEOF;
-        node->rhs = unary();
-        if (node->rhs->ty == ND_IDENT) {
-            Var *var = map_get(vars, node->rhs->name);
-            node->rhs->cty = var->cty;
+        node->expr = unary();
+        if (node->expr->ty == ND_IDENT) {
+            Var *var = map_get(vars, node->expr->name);
+            node->expr->cty = var->cty;
         }
         Node *ret = malloc(sizeof(Node));
         ret->ty = ND_NUM;
         ret->cty = &int_cty;
-        ret->val = size_of(node->rhs->cty);
-        node->rhs = ret;
+        ret->val = size_of(node->expr->cty);
+        node->expr = ret;
         return node;
     }
     
@@ -361,7 +361,8 @@ static Node *stmt() {
         return node;
 
     } else if (consume(TK_RETURN)) {
-        node = new_node(TK_RETURN, NULL, lor());
+        node->ty = ND_RETURN;
+        node->expr = lor();
         expect(';');
         return node;
 

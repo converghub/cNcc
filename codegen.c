@@ -11,7 +11,7 @@ static int label_counter = 0;
 // gen
 static void gen_lval(Node *node) {
     if (node->ty == ND_DEREF) {
-        return gen(node->rhs);
+        return gen(node->expr);
     }
     if (node->ty != ND_IDENT && node->ty != ND_VAR_DEF && node->ty != ND_ADDR)
         error("gen_lval(): not a lvalue.");
@@ -258,7 +258,7 @@ void gen(Node *node, ...) {
     }
 
     if (node->ty == ND_DEREF) {
-        gen(node->rhs);
+        gen(node->expr);
         printf("    pop rax\n");
         printf("    mov rax, [rax]\n");
         printf("    push rax\n");
@@ -266,18 +266,18 @@ void gen(Node *node, ...) {
     }
 
     if (node->ty == ND_ADDR) {
-        gen_lval(node->rhs);
+        gen_lval(node->expr);
         return;
     }
 
     if (node->ty == ND_RETURN) {
-        gen(node->rhs);
+        gen(node->expr);
         printf("    jmp .%s_end\n", va_arg(parent_func, Node*)->name);
         return;
     }
 
     if (node->ty == ND_SIZEOF) {
-        gen(node->rhs);
+        gen(node->expr);
         return;
     }
 
