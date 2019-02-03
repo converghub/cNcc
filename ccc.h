@@ -172,4 +172,4 @@ Node *addr_of(Node *base, Type *cty);
 
 // codegen.c
 void gen(Node *node, ...);
-void gen_code(Vector *code);
+void gen_x86(Vector *code);
