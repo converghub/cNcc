@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
     Vector *code = parse(tokens);
 
     // gen code
-    gen_code(code);
+    gen_x86(code);
 
     return 0;
 } 

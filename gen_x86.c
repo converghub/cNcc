@@ -401,7 +401,7 @@ static char *escape(char *s, int len) {
   return buf;
 }
 
-void gen_code(Vector *code) {
+void gen_x86(Vector *code) {
     printf(".intel_syntax noprefix\n");
 
 
