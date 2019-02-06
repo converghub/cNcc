@@ -245,21 +245,15 @@ void gen(Node *node, ...) {
         printf("    pop rdi\n");
         printf("    pop rax\n");
 
-        if(node->lhs->cty == NULL) {
-            // Ary
+
+        if(size_of(node->lhs->cty) == 4) 
+            printf("    mov [rax], edi\n");
+        else if (size_of(node->lhs->cty) == 1)
+            printf("    mov [rax], dil\n");
+        else
             printf("    mov [rax], rdi\n");
-            printf("    push rdi\n");
-            return;
-        } else {
-            if(size_of(node->lhs->cty) == 4) 
-                printf("    mov [rax], edi\n");
-            else if (size_of(node->lhs->cty) == 1)
-                printf("    mov [rax], dil\n");
-            else
-                printf("    mov [rax], rdi\n");
-            printf("    push rdi\n");
-            return;
-        }
+        printf("    push rdi\n");
+        return;
     }
 
     if (node->ty == ND_DEREF) {
@@ -281,32 +275,15 @@ void gen(Node *node, ...) {
         return;
     }
 
-    if (node->ty == ND_SIZEOF) {
-        gen(node->expr);
-        return;
-    }
-
     gen(node->lhs);
     gen(node->rhs);
 
     printf("    pop rdi\n");
     printf("    pop rax\n");
 
-    int flag = 0;
-    if (node->rhs->cty != NULL) {
-        if (node->rhs->cty->ty == PTR || node->rhs->cty->ty == ARY) {
-            flag = 1;  
-        }
-    }
-    if (node->lhs->cty != NULL) {
-        if (node->lhs->cty->ty == PTR || node->lhs->cty->ty == ARY) {
-            flag = 2;
-        }
-    }
-
     switch (node->ty) {
         case '+':
-            if (flag == 1) {
+            if (node->rhs->cty->ty == PTR || node->rhs->cty->ty == ARY) {
                 printf("    push rdi\n");
                 int coeff = 0;
                 if (node->rhs->cty->ty == ARY) 
@@ -316,7 +293,7 @@ void gen(Node *node, ...) {
                 printf("    mov rdi, %d\n", coeff);
                 printf("    mul rdi\n");
                 printf("    pop rdi\n");                
-            } else if (flag == 2) {
+            } else if (node->lhs->cty->ty == PTR || node->lhs->cty->ty == ARY) {
                 printf("    push rax\n");
                 printf("    mov rax, rdi\n");
                 int coeff = 0;
@@ -332,9 +309,9 @@ void gen(Node *node, ...) {
             printf("    add rax, rdi\n");
             break;
         case '-':
-            if (flag == 1) {
+            if (node->rhs->cty->ty == PTR || node->rhs->cty->ty == ARY) {
                 error("gen():  <expression> - <pointer> is not supported currently.\n");
-            } else if (flag == 2) {
+            } else if (node->lhs->cty->ty == PTR || node->lhs->cty->ty == ARY) {
                 printf("    push rax\n");
                 printf("    mov rax, rdi\n");
                 int coeff = 0;

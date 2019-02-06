@@ -88,7 +88,6 @@ static Node *walk(Node *node) {
             return node;
         case ND_DEREF:
             node->expr = walk(node->expr);
-            if (node->expr->cty->ty == ARY) error("HOGE!");
             if (node->expr->cty->ty != PTR)
                 error("sema(): operand must be a pointer");   
             node->cty = node->expr->cty->ptrof;
@@ -97,7 +96,8 @@ static Node *walk(Node *node) {
             node->expr = walk(node->expr);
             return node;
         case ND_SIZEOF:
-            return node;
+            node->expr = walk(node->expr);
+            return node->expr;
         case ND_FUNC_DEF:
             for (int i = 0; i < node->args->len; i++)
                 node->args->data[i] = walk(node->args->data[i]);
