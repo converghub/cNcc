@@ -116,7 +116,7 @@ Node *addr_of(Node *base, Type *cty) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_ADDR;
     node->cty = ptr_of(cty);
-    node->rhs = base;
+    node->expr = base;
     return node;
 }
 

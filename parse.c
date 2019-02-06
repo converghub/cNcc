@@ -5,14 +5,14 @@
 static Vector *tokens;
 static int pos;
 static int stacksize;
-static Vector *strings;
 static int globals_counter;
 static Type int_cty = {INT, NULL};
 static Type char_cty = {CHAR, NULL};
 static Node null_stmt = {ND_NULL};
 
-// for codegen.c
+// for sema.c, codegen.c
 Map *vars;
+Vector *strings;
 
 static void expect(int ty) {
     Token *t = tokens->data[pos];
@@ -416,7 +416,8 @@ static Node *stmt() {
     } else if (consume(';')) {
         return &null_stmt;
     } else {
-        node = assign();
+        node->ty = ND_EXPR_STMT;
+        node->expr = assign();
         expect(';');
         return node;
     }

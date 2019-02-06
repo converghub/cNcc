@@ -13,10 +13,13 @@ int main(int argc, char** argv) {
 
     // tokenize
     Vector *tokens = tokenize(argv[1]);
-    Vector *code = parse(tokens);
+    // parse
+    Vector *nodes = parse(tokens);
+    // semantic analysis
+    Vector *codes = sema(nodes);
 
     // gen code
-    gen_x86(code);
+    gen_x86(codes);
 
     return 0;
 } 

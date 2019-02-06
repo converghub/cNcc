@@ -6,6 +6,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <assert.h>
 
 
 // Vector
@@ -105,6 +106,7 @@ enum {
     ND_FOR,         // for
     ND_DEREF,       // Pointer dereference : *
     ND_ADDR,        // Address-of operater : &
+    ND_EXPR_STMT,   // Expression statement
     ND_CMPD_STMT,   // Compound statement
     ND_FUNC_CALL,   // Function call
     ND_FUNC_DEF,    // Function definition
@@ -150,9 +152,11 @@ typedef struct Node {
 // parse.c
 Vector *parse(Vector *tk);
 
-
 // token.c
 Vector *tokenize(char *p);
+
+// semantic_analysis.c
+Vector *sema(Vector *nodes);
 
 // container.c
 void error(char *fmt, ...);
