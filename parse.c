@@ -160,13 +160,13 @@ static Node *unary() {
     if (consume('*')) {
         Node *node = malloc(sizeof(Node));
         node->ty = ND_DEREF;
-        node->expr = mul();
+        node->expr = unary();
         return node;
     }
     if (consume('&')) {
         Node *node = malloc(sizeof(Node));
         node->ty = ND_ADDR;
-        node->expr = mul();
+        node->expr = unary();
         return node;
     }
     if (consume(TK_SIZEOF)) {
