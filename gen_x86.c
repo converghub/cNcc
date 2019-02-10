@@ -269,6 +269,24 @@ void gen(Node *node, ...) {
         return;
     }
 
+    if (node->ty == '!') {
+        gen(node->expr);
+        printf("    pop rax\n");
+        if (align_of(node->expr->cty) == 4) {
+            printf("    mov rcx, 0xFFFFFFFF\n");
+            printf("    and rax, rcx\n");            
+        }
+        else if (align_of(node->expr->cty) == 1) {
+            printf("    and rax, 0xFF\n");
+        } 
+        printf("    mov rdi, 0\n");
+        printf("    cmp rax, rdi\n");
+        printf("    sete al\n");
+        printf("    movzb rax, al\n");
+        printf("    push rax\n");
+        return;
+    }
+
     if (node->ty == ND_RETURN) {
         gen(node->expr);
         printf("    jmp .%s_end\n", va_arg(parent_func, Node*)->name);

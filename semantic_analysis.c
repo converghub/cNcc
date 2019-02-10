@@ -97,6 +97,10 @@ static Node *walk(Node *node) {
                 error("sema(): operand must be a pointer");   
             node->cty = node->expr->cty->ptrof;
             return node;
+        case '!':
+            node->expr = walk(node->expr);
+            node->cty = node->expr->cty;
+            return node;
         case ND_RETURN:
             node->expr = walk(node->expr);
             return node;
