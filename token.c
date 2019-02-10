@@ -20,7 +20,8 @@ static struct symbol{
     {"return", TK_RETURN}, {"while", TK_WHILE},      {"for", TK_FOR},
     {"int", TK_INT},       {"char", TK_CHAR},        {"sizeof", TK_SIZEOF},
     {"extern", TK_EXTERN}, {"do", TK_DO},            {"<=", TK_LE},
-    {">=", TK_GE},         {"_Alignof", TK_ALIGNOF},
+    {">=", TK_GE},         {"_Alignof", TK_ALIGNOF}, {"<<", TK_SHL},
+    {">>", TK_SHR},
 };
 
 

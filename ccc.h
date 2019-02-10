@@ -47,6 +47,8 @@ enum {
     TK_GE,          // >=
     TK_LOR,         // ||
     TK_LAND,        // &&
+    TK_SHL,         // <<
+    TK_SHR,         // >>
     TK_EOF,         // End of input
 };
 
@@ -120,6 +122,8 @@ enum {
     ND_GE,          // : >=
     ND_LOR,         // Logical OR operation : ||
     ND_LAND,        // Logical AND operation : &&
+    ND_SHL,         // : <<
+    ND_SHR,         // : >>
     ND_NULL,        // Null statement
 };
 

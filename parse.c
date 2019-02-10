@@ -231,18 +231,32 @@ static Node *add() {
 }
 
 
-static Node *rel() {
+static Node *shift() {
     Node *node = add();
 
     for (;;) {
+        if (consume(TK_SHL))
+            node = new_node(ND_SHL, node, add());
+        else if (consume(TK_SHR))
+            node = new_node(ND_SHR, node, add());
+        else
+            return node;
+    }
+}
+
+
+static Node *rel() {
+    Node *node = shift();
+
+    for (;;) {
         if (consume('<'))
-            node = new_node('<', node, add());
+            node = new_node('<', node, shift());
         else if (consume('>'))
-            node = new_node('>', node, add());
+            node = new_node('>', node, shift());
         else if (consume(TK_LE))
-            node = new_node(ND_LE, node, add());
+            node = new_node(ND_LE, node, shift());
         else if (consume(TK_GE))
-            node = new_node(ND_GE, node, add());
+            node = new_node(ND_GE, node, shift());
         else
             return node;
     }

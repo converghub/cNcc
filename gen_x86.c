@@ -369,6 +369,14 @@ void gen(Node *node, ...) {
         case ND_LOR:
             printf("    or rax, rdi\n");
             break;
+        case ND_SHL:
+            printf("    mov cl, dil\n");
+            printf("    shl rax, cl\n");        
+            break;
+        case ND_SHR:
+            printf("    mov cl, dil\n");
+            printf("    shr rax, cl\n");        
+            break;
     }
 
     printf("    push rax\n");

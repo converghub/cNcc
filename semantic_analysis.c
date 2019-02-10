@@ -80,6 +80,8 @@ static Node *walk(Node *node) {
         case ND_GE:
         case ND_LAND:
         case ND_LOR:
+        case ND_SHL:
+        case ND_SHR:
             node->lhs = walk(node->lhs);
             node->rhs = walk(node->rhs);
             node->cty = node->lhs->cty;
