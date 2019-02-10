@@ -76,6 +76,8 @@ static Node *walk(Node *node) {
         case '>':
         case ND_EQ:
         case ND_NE:
+        case ND_LE:
+        case ND_GE:
         case ND_LAND:
         case ND_LOR:
             node->lhs = walk(node->lhs);

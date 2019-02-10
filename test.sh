@@ -42,6 +42,13 @@ long **alloc_ptr_ptr(long x) {
 }
 EOF
 
+try 1 'int main() { return 4<=5; }'
+try 1 'int main() { return 5<=5; }'
+try 0 'int main() { return 6<=5; }'
+try 0 'int main() { return 4>=5; }'
+try 1 'int main() { return 5>=5; }'
+try 1 'int main() { return 6>=5; }'
+
 try 21 'int main() { 5+20-4;}'
 try 41 "int main() {12 + 34 - 5;}"
 try 47 "int main() {5+6*7;}"
@@ -81,6 +88,13 @@ try 0 'int main() { return 0>1; }'
 try 1 'int main() { return 1>0; }'
 try 0 'int main() { return 0<0; }'
 try 0 'int main() { return 0>0; }'
+
+try 1 'int main() { return 4<=5; }'
+try 1 'int main() { return 5<=5; }'
+try 0 'int main() { return 6<=5; }'
+try 0 'int main() { return 4>=5; }'
+try 1 'int main() { return 5>=5; }'
+try 1 'int main() { return 6>=5; }'
 
 try 11 'int main(){int a; a=1; while (a<11) a=a+1; return a;}'
 try 11 'int main(){int b; b=1; while (11+1>b+1) b=b+1; return b;}'
