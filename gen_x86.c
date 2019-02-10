@@ -363,6 +363,9 @@ void gen(Node *node, ...) {
             printf("    setl al\n");
             printf("    movzb rax, al\n");
             break;
+        case '|':
+            printf("    or rax, rdi\n");
+            break;
         case ND_LAND:
             printf("    and rax, rdi\n");
             break;

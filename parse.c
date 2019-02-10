@@ -277,12 +277,24 @@ static Node *equality() {
 }
 
 
-static Node *land() {
+static Node *b_or() {
     Node *node = equality();
 
     for (;;) {
+        if (consume('|'))
+            node = new_node('|', node, equality());
+        else
+            return node;        
+    }
+}
+
+
+static Node *land() {
+    Node *node = b_or();
+
+    for (;;) {
         if (consume(TK_LAND))
-            node = new_node(ND_LAND, node, land());
+            node = new_node(ND_LAND, node, b_or());
         else
             return node;        
     }
@@ -294,7 +306,7 @@ static Node *lor() {
 
     for (;;) {
         if (consume(TK_LOR))
-            node = new_node(ND_LOR, node, lor());
+            node = new_node(ND_LOR, node, land());
         else
             return node;
     }
