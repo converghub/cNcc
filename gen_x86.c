@@ -287,9 +287,9 @@ void gen(Node *node, ...) {
                 printf("    push rdi\n");
                 int coeff = 0;
                 if (node->rhs->cty->ty == ARY) 
-                    coeff = size_of(ctype_of_ary(node->rhs->cty));
+                    coeff = align_of(node->rhs->cty);
                 else
-                    coeff = size_of(node->rhs->cty->ptrof);
+                    coeff = align_of(node->rhs->cty->ptrof);
                 printf("    mov rdi, %d\n", coeff);
                 printf("    mul rdi\n");
                 printf("    pop rdi\n");                
@@ -298,9 +298,9 @@ void gen(Node *node, ...) {
                 printf("    mov rax, rdi\n");
                 int coeff = 0;
                 if (node->lhs->cty->ty == ARY) 
-                    coeff = size_of(ctype_of_ary(node->lhs->cty));
+                    coeff = align_of(node->lhs->cty);
                 else
-                    coeff = size_of(node->lhs->cty->ptrof);                
+                    coeff = align_of(node->lhs->cty->ptrof);                
                 printf("    mov rdi, %d\n", coeff);
                 printf("    mul rdi\n");
                 printf("    mov rdi, rax\n");
@@ -316,9 +316,9 @@ void gen(Node *node, ...) {
                 printf("    mov rax, rdi\n");
                 int coeff = 0;
                 if (node->lhs->cty->ty == ARY) 
-                    coeff = size_of(ctype_of_ary(node->lhs->cty));
+                    coeff = align_of(node->lhs->cty);
                 else
-                    coeff = size_of(node->lhs->cty->ptrof);  
+                    coeff = align_of(node->lhs->cty->ptrof);  
                 printf("    mov rdi, %d\n",  coeff);
                 printf("    mul rdi\n");
                 printf("    mov rdi, rax\n");

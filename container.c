@@ -108,7 +108,21 @@ int size_of(Type *cty) {
     else if (cty->ty == ARY)
         return size_of(cty->aryof) * cty->len;
     else
-        error("size_of(): invalid ty value.\n");
+        error("size_of(): invalid cty value.\n");
+        return 0;
+}
+
+int align_of(Type *cty) {
+    if (cty->ty == CHAR)
+        return 1;
+    else if (cty->ty == INT) 
+        return 4;
+    else if (cty->ty == PTR)
+        return 8;
+    else if (cty->ty == ARY)
+        return align_of(cty->aryof);
+    else
+        error("align_of(): invalid cty value.\n");
         return 0;
 }
 

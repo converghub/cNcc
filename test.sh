@@ -42,13 +42,6 @@ long **alloc_ptr_ptr(long x) {
 }
 EOF
 
-try 1 'int main() { return 4<=5; }'
-try 1 'int main() { return 5<=5; }'
-try 0 'int main() { return 6<=5; }'
-try 0 'int main() { return 4>=5; }'
-try 1 'int main() { return 5>=5; }'
-try 1 'int main() { return 6>=5; }'
-
 try 21 'int main() { 5+20-4;}'
 try 41 "int main() {12 + 34 - 5;}"
 try 47 "int main() {5+6*7;}"
@@ -139,6 +132,11 @@ try 4 'int main() { int x; return sizeof(x); }'
 try 4 'int main() { int x; return sizeof(x); }'
 try 8 'int main() { int *x; return sizeof x; }'
 try 16 'int main() { int x[4]; return sizeof x; }'
+try 1 'int main() { char x; return _Alignof(x); }'
+try 4 'int main() { int x; return _Alignof(x); }'
+try 8 'int main() { int *x; return _Alignof x; }'
+try 4 'int main() { int x[4]; return _Alignof x; }'
+try 8 'int main() { int *x[4]; return _Alignof x; }'
 
 try 5 'int main() { int x; int *p = &x; x = 5; return p[0];}'
 try 3 'int main() { int ary[2]; ary[0]=1; ary[1]=2; return ary[0] + ary[1];}'

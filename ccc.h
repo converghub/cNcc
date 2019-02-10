@@ -31,6 +31,7 @@ enum {
     TK_STR,         // String
     TK_RETURN,      // "return"
     TK_SIZEOF,      // "sizeof"
+    TK_ALIGNOF,     // "_Alignof"
     TK_IDENT,       // Identifier
     TK_EXTERN,      // "extern"
     TK_INT,         // "int"
@@ -100,6 +101,7 @@ enum {
     ND_STR,         // String literal
     ND_RETURN,      // return
     ND_SIZEOF,      // sizeof
+    ND_ALIGNOF,     // alignof
     ND_IDENT,       // Identifier
     ND_VAR_DEF,     // Variable definition
     ND_IF,          // if
@@ -174,6 +176,7 @@ void *map_get(Map *map, char *key);
 bool map_exist(Map *map, char *key);
 Type *ptr_of (Type *base);
 int size_of(Type *cty);
+int align_of(Type *cty);
 Type *ary_of(Type *base, int len);
 Type *ctype_of_ary(Type *cty);
 Node *addr_of(Node *base, Type *cty);

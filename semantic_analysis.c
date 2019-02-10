@@ -100,6 +100,9 @@ static Node *walk(Node *node) {
         case ND_SIZEOF:
             node->expr = walk(node->expr);
             return node->expr;
+        case ND_ALIGNOF:
+            node->expr = walk(node->expr);
+            return node->expr;
         case ND_FUNC_DEF:
             for (int i = 0; i < node->args->len; i++)
                 node->args->data[i] = walk(node->args->data[i]);
