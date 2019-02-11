@@ -289,6 +289,14 @@ void gen(Node *node, ...) {
         return;
     }
 
+    if (node->ty == '~') {
+        gen(node->expr);
+        printf("    pop rax\n");
+        printf("    not rax\n");
+        printf("    push rax\n");
+        return;
+    }
+
     if (node->ty == '?') {        
         int cndtnl_label = label_counter++;
 

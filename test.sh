@@ -104,6 +104,9 @@ try 3 'int main() { return (1),2,3; }'
 try 3 'int main() { return 1 ? 3 : 5; }'
 try 5 'int main() { return 0 ? 3 : 5; }'
 
+try 0 'int main() { int a=1; a = a-2; return ~a; }'
+try 10 'int main() { int a=0; a = a-11; return ~a; }'
+
 try 11 'int main(){int a; a=1; while (a<11) a=a+1; return a;}'
 try 11 'int main(){int b; b=1; while (11+1>b+1) b=b+1; return b;}'
 try 11 'int main(){int a; a=1; while (a+1<11+1) a=a+1; return a;}'

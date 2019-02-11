@@ -176,6 +176,12 @@ static Node *unary() {
         node->expr = unary();
         return node;
     }
+    if (consume('~')) {
+        Node *node = malloc(sizeof(Node));
+        node->ty = '~';
+        node->expr = unary();
+        return node;        
+    }
     if (consume(TK_SIZEOF)) {
         Node *node = malloc(sizeof(Node));
         node->ty = ND_SIZEOF;

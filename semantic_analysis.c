@@ -105,6 +105,7 @@ static Node *walk(Node *node) {
             node->cty = node->expr->cty->ptrof;
             return node;
         case '!':
+        case '~':
             node->expr = walk(node->expr);
             node->cty = node->expr->cty;
             return node;
