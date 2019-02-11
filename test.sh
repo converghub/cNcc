@@ -42,11 +42,13 @@ long **alloc_ptr_ptr(long x) {
 }
 EOF
 
-try 21 'int main() { 5+20-4;}'
-try 41 "int main() {12 + 34 - 5;}"
-try 47 "int main() {5+6*7;}"
-try 15 "int main() {5*(9 - 6);}"
-try 4 "int main() {(3+5)/2;}"
+try 21 'int main() { 5+20-4; }'
+try 41 'int main() { 12 + 34 - 5; }'
+try 47 'int main() { 5+6*7; }'
+try 15 'int main() { 5*(9 - 6); }'
+try 4 'int main() { (3+5)/2; }'
+try 4 'int main() { 19 % 5; }'
+try 0 'int main() { 9 % 3; }'
 
 try 21 "int main() {1+2; 5+20-4;}"
 try 3 "int main() {int a=3;a;}"

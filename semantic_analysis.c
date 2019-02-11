@@ -78,6 +78,7 @@ static Node *walk(Node *node) {
             return node;
         case '*':
         case '/':
+        case '%':
         case '<':
         case '>':
         case '|':

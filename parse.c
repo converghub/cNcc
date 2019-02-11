@@ -224,6 +224,8 @@ static Node *mul() {
             node = new_node('*', node, unary());
         else if (consume('/'))
             node = new_node('/', node, unary());
+        else if (consume('%'))
+            node = new_node('%', node, unary());            
         else
             return node;
     }
