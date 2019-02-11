@@ -86,13 +86,14 @@ static Var *new_global(Type *cty, char *name, char *data, int len) {
 
 static Node *assign();
 static Node *mul();
+static Node *comma();
 static Node *stmt();
 static Node *cmpd_stmt();
 
 
 static Node *term() {
     if (consume('(')) {
-        Node *node = assign();
+        Node *node = comma();
 
         if (!consume(')'))
             error("term(): 開きカッコに対応する閉じカッコがありません: %s",
@@ -341,10 +342,19 @@ static Node *assign() {
 }
 
 
+static Node *comma() {
+    Node *node = assign();
+    if (consume(','))
+        return new_node(',', node, comma());
+    else
+        return node;
+}
+
+
 static Type *read_array(Type *cty) {
     Vector *ary_size = new_vector();
     while (consume('[')) {
-        Node *len = term();
+        Node *len = comma();
         if (len->ty != ND_NUM)
             error("decl(): number expected.\n");
         vec_push(ary_size, len);   
@@ -384,6 +394,7 @@ static Node* decl() {
     map_put(vars, node->name, var);
 
     // Check initializer
+    // TODO: add commas act as seperators in this line, not as an operator
     if (consume('='))
         node->init = assign();
     return node;
@@ -397,7 +408,7 @@ static Node *stmt() {
         node->ty = ND_IF;
         // condition
         expect('(');
-        node->bl_expr = assign();
+        node->bl_expr = comma();
         expect(')');
         // if true statements
         if (consume('{')) {
@@ -424,14 +435,14 @@ static Node *stmt() {
 
     } else if (consume(TK_RETURN)) {
         node->ty = ND_RETURN;
-        node->expr = lor();
+        node->expr = comma();
         expect(';');
         return node;
 
     } else if (consume(TK_WHILE)) {
         node->ty = ND_WHILE;
         expect('(');
-        node->bl_expr = assign();
+        node->bl_expr = comma();
         expect(')');
         if(consume('{')) {
             node->body = cmpd_stmt();
@@ -451,7 +462,7 @@ static Node *stmt() {
         }
         expect(TK_WHILE);
         expect('(');
-        node->bl_expr = assign();
+        node->bl_expr = comma();
         expect(')');
         expect(';');
         return node;
@@ -462,11 +473,11 @@ static Node *stmt() {
         if (GET_TK(tokens, pos)->ty == TK_INT || GET_TK(tokens, pos)->ty == TK_CHAR) {
             node->init = decl();
         } else
-            node->init = assign();
+            node->init = comma();
         expect(';');
-        node->bl_expr = assign();
+        node->bl_expr = comma();
         expect(';');
-        node->inc = assign();
+        node->inc = comma();
         expect(')');
         if(consume('{')) {
             node->body = cmpd_stmt();
@@ -479,7 +490,7 @@ static Node *stmt() {
         return &null_stmt;
     } else {
         node->ty = ND_EXPR_STMT;
-        node->expr = assign();
+        node->expr = comma();
         expect(';');
         return node;
     }

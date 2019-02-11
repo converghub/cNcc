@@ -102,6 +102,11 @@ static Node *walk(Node *node) {
             node->expr = walk(node->expr);
             node->cty = node->expr->cty;
             return node;
+        case ',':
+            node->lhs = walk(node->lhs);
+            node->rhs = walk(node->rhs);
+            node->cty = node->rhs->cty;
+            return node;
         case ND_RETURN:
             node->expr = walk(node->expr);
             return node;

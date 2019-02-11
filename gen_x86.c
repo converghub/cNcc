@@ -296,6 +296,8 @@ void gen(Node *node, ...) {
     gen(node->lhs);
     gen(node->rhs);
 
+    if (node->ty == ',') return;
+
     printf("    pop rdi\n");
     printf("    pop rax\n");
 
