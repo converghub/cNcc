@@ -384,6 +384,9 @@ void gen(Node *node, ...) {
         case '|':
             printf("    or rax, rdi\n");
             break;
+        case '^':
+            printf("    xor rax, rdi\n");
+            break;
         case ND_LAND:
             printf("    and rax, rdi\n");
             break;

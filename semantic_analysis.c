@@ -75,6 +75,7 @@ static Node *walk(Node *node) {
         case '<':
         case '>':
         case '|':
+        case '^':
         case ND_EQ:
         case ND_NE:
         case ND_LE:

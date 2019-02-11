@@ -283,12 +283,24 @@ static Node *equality() {
 }
 
 
-static Node *b_or() {
+static Node *b_xor() {
     Node *node = equality();
 
     for (;;) {
+        if (consume('^'))
+            node = new_node('^', node, equality());
+        else
+            return node;        
+    }
+}
+
+
+static Node *b_or() {
+    Node *node = b_xor();
+
+    for (;;) {
         if (consume('|'))
-            node = new_node('|', node, equality());
+            node = new_node('|', node, b_xor());
         else
             return node;        
     }
