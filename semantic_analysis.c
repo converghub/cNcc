@@ -70,6 +70,12 @@ static Node *walk(Node *node) {
             node->rhs = walk(node->rhs);
             node->cty = node->lhs->cty;
             return node;
+        case '?':
+            node->bl_expr = walk(node->bl_expr);
+            node->tr_stmt = walk(node->tr_stmt);
+            node->els_stmt = walk(node->els_stmt);
+            node->cty = node->tr_stmt->cty;
+            return node;
         case '*':
         case '/':
         case '<':

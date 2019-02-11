@@ -332,8 +332,24 @@ static Node *lor() {
 }
 
 
-static Node *assign() {
+static Node *cndtnl() {
     Node *node = lor();
+
+    if (consume('?')) {
+        Node *cnode = malloc(sizeof(Node));
+        cnode->ty = '?';
+        cnode->bl_expr = node;
+        cnode->tr_stmt = assign();
+        expect(':');
+        cnode->els_stmt = assign();
+        return cnode;
+    } else
+        return node;
+}
+
+
+static Node *assign() {
+    Node *node = cndtnl();
 
     if (consume('='))
         return new_node('=', node, assign());
