@@ -71,6 +71,7 @@ try 21 'int add(int a,int b,int c,int d,int e,int f) { return a+b+c+d+e+f; } int
 
 try 2 'int main() { if (1) return 2; return 3; }'
 try 3 'int main() { if (0) return 2; return 3; }'
+try 2 'int main() { int a; if (1) a=2; else a=3; return a; }'
 try 4 'int one(int x) { return x*2; } int main() { if (1) {return one(2);} return 3; }'
 try 2 'int main() { if (1) return 2; else return 3; }'
 try 3 'int main() { if (0) return 2; else {return 3;} }'
