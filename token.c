@@ -21,7 +21,7 @@ static struct symbol{
     {"int", TK_INT},       {"char", TK_CHAR},        {"sizeof", TK_SIZEOF},
     {"extern", TK_EXTERN}, {"do", TK_DO},            {"<=", TK_LE},
     {">=", TK_GE},         {"_Alignof", TK_ALIGNOF}, {"<<", TK_SHL},
-    {">>", TK_SHR},
+    {">>", TK_SHR},        {"++", TK_INC},           {"--", TK_DEC},
 };
 
 

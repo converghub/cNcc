@@ -49,6 +49,8 @@ enum {
     TK_LAND,        // &&
     TK_SHL,         // <<
     TK_SHR,         // >>
+    TK_INC,         // ++
+    TK_DEC,         // --
     TK_EOF,         // End of input
 };
 
@@ -125,6 +127,10 @@ enum {
     ND_LAND,        // Logical AND operation : &&
     ND_SHL,         // : <<
     ND_SHR,         // : >>
+    ND_PRE_INC,     // pre ++
+    ND_PRE_DEC,     // pre --
+    ND_POST_INC,    // post ++
+    ND_POST_DEC,    // post --
     ND_NULL,        // Null statement
 };
 

@@ -279,6 +279,51 @@ void gen(Node *node, ...) {
         return;
     }
 
+    if (node->ty == ND_PRE_INC || node->ty == ND_PRE_DEC) {
+        gen(node->expr);
+        gen_lval(node->expr);
+        if (size_of(node->cty) == 4) {
+            printf("    mov eax, [rax]\n");  
+        }
+        else if (size_of(node->cty) == 1) {
+            printf("    mov al, [rax]\n");
+            printf("    and rax, 0xFF\n");
+        } else
+            printf("    mov rax, [rax]\n");
+        if (node->ty == ND_PRE_INC)
+            printf("    add rax, 1\n");
+        else if (node->ty == ND_PRE_DEC)
+            printf("    sub rax, 1\n");        
+        printf("    pop rdx\n");
+        printf("    mov [rdx], rax\n");
+
+        printf("    push rax\n");
+        return;
+    }
+
+    if (node->ty == ND_POST_INC || node->ty == ND_POST_DEC) {
+        gen(node->expr);
+        printf("    pop r11\n");
+        gen_lval(node->expr);
+        if (size_of(node->cty) == 4) {
+            printf("    mov eax, [rax]\n");  
+        }
+        else if (size_of(node->cty) == 1) {
+            printf("    mov al, [rax]\n");
+            printf("    and rax, 0xFF\n");
+        } else
+            printf("    mov rax, [rax]\n");
+        if (node->ty == ND_POST_INC)
+            printf("    add rax, 1\n");
+        else if (node->ty == ND_POST_DEC)
+            printf("    sub rax, 1\n");        
+        printf("    pop rdx\n");
+        printf("    mov [rdx], rax\n");
+
+        printf("    push r11\n");
+        return;
+    }
+
     if (node->ty == '!') {
         gen(node->expr);
         printf("    pop rax\n");

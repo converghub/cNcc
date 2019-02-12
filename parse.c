@@ -155,14 +155,35 @@ static Node *term() {
 
 static Node *postfix() {
     Node *lhs = term();
-    while (consume('[')) {
-        Node *node = malloc(sizeof(Node));
-        node->ty = ND_DEREF;
-        node->expr = new_node('+', lhs, assign());
-        lhs = node;
-        expect(']');
+
+    for (;;) {
+        if (consume(TK_INC)) {
+            Node *node = malloc(sizeof(Node));
+            node->ty = ND_POST_INC;
+            node->expr = lhs;
+            lhs = node;
+            continue;
+        }
+
+        if (consume(TK_DEC)) {
+            Node *node = malloc(sizeof(Node));
+            node->ty = ND_POST_DEC;
+            node->expr = lhs;
+            lhs = node;
+            continue;
+        }
+
+        if (consume('[')) {
+            Node *node = malloc(sizeof(Node));
+            node->ty = ND_DEREF;
+            node->expr = new_node('+', lhs, assign());
+            lhs = node;
+            expect(']');
+            continue;
+        }
+
+        return lhs;
     }
-    return lhs;
 }
 
 
@@ -190,6 +211,18 @@ static Node *unary() {
         node->ty = '~';
         node->expr = unary();
         return node;        
+    }
+    if (consume(TK_INC)) {
+        Node *node = malloc(sizeof(Node));
+        node->ty = ND_PRE_INC;
+        node->expr = unary();
+        return node;             
+    }
+    if (consume(TK_DEC)) {
+        Node *node = malloc(sizeof(Node));
+        node->ty = ND_PRE_DEC;
+        node->expr = unary();
+        return node;             
     }
     if (consume(TK_SIZEOF)) {
         Node *node = malloc(sizeof(Node));
