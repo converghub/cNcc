@@ -77,11 +77,19 @@ void gen(Node *node, ...) {
         printf("    ret\n");
         return;
     }
-    if(node->ty == ND_EXPR_STMT) {
+
+    if (node->ty == ND_EXPR_STMT) {
         gen(node->expr);
         return;
     }
 
+    if (node->ty == ND_STMT_EXPR) {
+        Node *expr_node = node->stmt_expr;
+        for (int i = 0; i < expr_node->stmts->len; i++) {
+            gen(expr_node->stmts->data[i]);
+        }
+        return;
+    }
 
     if (node->ty == ND_IF) {
         gen(node->bl_expr);

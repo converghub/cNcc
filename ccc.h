@@ -113,6 +113,7 @@ enum {
     ND_DEREF,       // Pointer dereference : *
     ND_ADDR,        // Address-of operater : &
     ND_EXPR_STMT,   // Expression statement
+    ND_STMT_EXPR,   // Statement expression
     ND_CMPD_STMT,   // Compound statement
     ND_FUNC_CALL,   // Function call
     ND_FUNC_DEF,    // Function definition
@@ -136,6 +137,7 @@ typedef struct Node {
     char *str;              // for ND_STR
     char *name;             // for ND_IDENT
     struct Node *expr;      // for ND_RETURN, ND_DEREF, ND_SIZEOF
+    struct Node *stmt_expr; // for ND_STMT_EXPR
     Vector *stmts;          // for ND_CMPD_STMT
 
     // Function

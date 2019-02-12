@@ -141,7 +141,24 @@ static Node *walk(Node *node) {
             return node;
         case ND_EXPR_STMT:
             node->expr = walk(node->expr);
+            node->cty = node->expr->cty;
             return node;
+        case ND_STMT_EXPR: {
+            Node *expr_node = node->stmt_expr;
+            for (int i = 0; i < expr_node->stmts->len; i++)
+                expr_node->stmts->data[i] = walk(expr_node->stmts->data[i]);        
+
+            if (expr_node->stmts->len > 0) {
+                Node *last = expr_node->stmts->data[expr_node->stmts->len - 1];
+                if (last->ty != ND_EXPR_STMT)
+                    error("sema(): The last thing in Statement expressions should be an expression");                
+                node->cty = last->cty;
+            } else {
+                // TODO: cutrrently "int", but should be "void"
+                node->cty = &int_cty;
+            }
+            return node;
+        }
         case ND_NULL:
             return node;
         default:

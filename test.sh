@@ -187,3 +187,9 @@ try 99 'int main() { char *p = "abc"; char *q = "def"; return p[2]; }'
 try 5 'extern int global_arr[1]; int main() { return global_arr[0]; }'
 
 try 1 'int main() {; return 1;}'
+# https://gcc.gnu.org/onlinedocs/gcc/Statement-Exprs.html
+try 8 'int main() { return 3 + ({ 5; }); }'
+try 28 'int main() { return 3 + ({ 5*5; }); }'
+try 11 'int main() { return 3 + ({ 1+2+5; }); }'
+# TODO: The following should work
+# try 11 'int main() { return 3 + ({ 1; 1; 1+2+5; }); }'

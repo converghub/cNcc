@@ -93,8 +93,17 @@ static Node *cmpd_stmt();
 
 static Node *term() {
     if (consume('(')) {
-        Node *node = comma();
+        if (consume('{')) {
+            Node *node = malloc(sizeof(Node));
+            node->ty = ND_STMT_EXPR;
+            node->stmt_expr = cmpd_stmt();
+            expect('}');
+            expect(')');
+            return node;
+        }
 
+
+        Node *node = comma();
         if (!consume(')'))
             error("term(): 開きカッコに対応する閉じカッコがありません: %s",
                 GET_TK(tokens, pos)->input);
