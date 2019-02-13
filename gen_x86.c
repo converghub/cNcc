@@ -13,22 +13,13 @@ static void gen_lval(Node *node) {
     if (node->ty == ND_DEREF) {
         return gen(node->expr);
     }
-    if (node->ty != ND_IDENT && node->ty != ND_VAR_DEF && node->ty != ND_ADDR)
-        error("gen_lval(): not a lvalue.");
 
-    if (!map_exist(vars, node->name)) {
-        error("undefined variable: %s", node->name);
-    }
-
-    Var *var = map_get(vars, node->name);
-    node->cty = var->cty;
-
-    if (var->is_local) {
+    if (node->ty == ND_LVAR || node->ty == ND_VAR_DEF) {
         printf("    mov rax, rbp\n");
-        printf("    sub rax, %d\n", var->offset);
-        printf("    push rax\n");        
+        printf("    sub rax, %d\n", node->offset);
+        printf("    push rax\n"); 
     } else {
-        printf("    lea rax, %s\n", var->name);
+        printf("    lea rax, %s\n", node->name);
         printf("    push rax\n");
     }
     return;
@@ -80,6 +71,12 @@ void gen(Node *node, ...) {
 
     if (node->ty == ND_EXPR_STMT) {
         gen(node->expr);
+        return;
+    }
+
+    if (node->ty == ND_CMPD_STMT) {
+        for (int i = 0; i < node->stmts->len; i++)
+            gen(node->stmts->data[i]);
         return;
     }
 
@@ -199,9 +196,9 @@ void gen(Node *node, ...) {
         return;
     }
 
-    if (node->ty == ND_IDENT) {
+    if (node->ty == ND_LVAR || node->ty == ND_GVAR) {
         gen_lval(node);
-        if (node->cty->ty == ARY) return;
+        //if (node->cty->ty == ARY) return;
         printf("    pop rax\n");
         if (size_of(node->cty) == 4) {
             printf("    mov eax, [rax]\n");            
@@ -229,7 +226,6 @@ void gen(Node *node, ...) {
             printf("    mov [rax], dil\n");
         else
             printf("    mov [rax], rdi\n");
-        printf("    push rdi\n");
         return;
     }
 
@@ -530,22 +526,16 @@ static char *escape(char *s, int len) {
   return buf;
 }
 
-void gen_x86(Vector *code) {
+void gen_x86(Vector *code, Vector *global_vars) {
     printf(".intel_syntax noprefix\n");
 
 
     printf(".data\n");
     // Global variable
-    for (int i = 0; i < code->len; i++) {
-        Node *node = code->data[i];
-        if (node->ty == ND_VAR_DEF) {
-            Var *var = map_get(vars, node->name);
-            if (var->is_extern)
-                continue;
-            printf("%s:\n", var->name);
-            printf("    .ascii \"%s\"\n", escape(var->data, var->len));          
-        } else
-            continue;
+    for (int i = 0; i < global_vars->len; i++) {
+        Var *var = global_vars->data[i];
+        printf("%s:\n", var->name);
+        printf("    .ascii \"%s\"\n", escape(var->data, var->len));          
     }
 
     printf(".text\n");

@@ -4,14 +4,12 @@
 
 static Vector *tokens;
 static int pos;
-static int stacksize;
 static int globals_counter;
 static Type int_cty = {INT, NULL};
 static Type char_cty = {CHAR, NULL};
 static Node null_stmt = {ND_NULL};
 
 // for sema.c, codegen.c
-Map *vars;
 Vector *strings;
 
 static void expect(int ty) {
@@ -70,17 +68,6 @@ static Node *new_node_ident(char *name) {
     node->ty = ND_IDENT;
     node->name = name;
     return node;    
-}
-
-
-static Var *new_global(Type *cty, char *name, char *data, int len) {
-    Var *var = malloc(sizeof(Var));
-    var->cty = cty;
-    var->is_local = false;
-    var->name = name;
-    var->data = data;
-    var->len = len;
-    return var;
 }
 
 
@@ -228,30 +215,12 @@ static Node *unary() {
         Node *node = malloc(sizeof(Node));
         node->ty = ND_SIZEOF;
         node->expr = unary();
-        if (node->expr->ty == ND_IDENT) {
-            Var *var = map_get(vars, node->expr->name);
-            node->expr->cty = var->cty;
-        }
-        Node *ret = malloc(sizeof(Node));
-        ret->ty = ND_NUM;
-        ret->cty = &int_cty;
-        ret->val = size_of(node->expr->cty);
-        node->expr = ret;
         return node;
     }
     if(consume(TK_ALIGNOF)) {
         Node *node = malloc(sizeof(Node));
         node->ty = ND_ALIGNOF;
         node->expr = unary();
-        if (node->expr->ty == ND_IDENT) {
-            Var *var = map_get(vars, node->expr->name);
-            node->expr->cty = var->cty;
-        }
-        Node *ret = malloc(sizeof(Node));
-        ret->ty = ND_NUM;
-        ret->cty = &int_cty;
-        ret->val = align_of(node->expr->cty);
-        node->expr = ret;
         return node;        
     }    
     return postfix();
@@ -451,14 +420,6 @@ static Node* decl() {
     // Check & read array
    node->cty = read_array(node->cty);
 
-    // Set stacksize
-    stacksize += size_of(node->cty);  
-    Var *var = malloc(sizeof(Var));
-    var->offset = stacksize;
-    var->cty = node->cty;
-    var->is_local = true;
-    map_put(vars, node->name, var);
-
     // Check initializer
     // TODO: add commas act as seperators in this line, not as an operator
     if (consume('='))
@@ -552,6 +513,12 @@ static Node *stmt() {
             node->body = stmt();
         }
         return node;
+    } else if (consume('{')) {
+        node->ty = ND_CMPD_STMT;
+        node->stmts = new_vector();
+        while (!consume('}'))
+            vec_push(node->stmts, stmt());
+        return node;
     } else if (consume(';')) {
         return &null_stmt;
     } else {
@@ -576,7 +543,6 @@ static Node *cmpd_stmt() {
 
 static Node *top() {
     bool is_extern = consume(TK_EXTERN);
-    stacksize = 0;
     strings = new_vector();
     Node *node = malloc(sizeof(Node));
 
@@ -602,15 +568,9 @@ static Node *top() {
             else
                 error("function(): Argument type expected, but got %s.\n", GET_TK(tokens, pos)->input);
 
-            if (!map_exist(vars, ((Node *)node->args->data[argc])->name)) {
-                ((Node *)node->args->data[argc])->cty = arg_cty;
-                stacksize += size_of( ((Node *)node->args->data[argc])->cty );
-                Var *var = malloc(sizeof(Var));
-                var->cty = ((Node *)node->args->data[argc])->cty;
-                var->is_local = true;
-                var->offset = stacksize;
-                map_put(vars, ((Node *)node->args->data[argc++])->name, var);
-            }
+            ((Node *)node->args->data[argc])->ty = ND_VAR_DEF;
+            ((Node *)node->args->data[argc])->cty = arg_cty;
+            argc++;
 
             if (consume(',')) {
                 if (GET_TK(tokens, pos)->ty == (')'))
@@ -639,10 +599,6 @@ static Node *top() {
         node->is_extern = false;
     }
 
-    Var *var = new_global(node->cty, node->name, node->data, node->len);
-    var->is_extern = node->is_extern;
-    map_put(vars, node->name, var);
-
     expect(';');
     return node;
 }
@@ -651,14 +607,10 @@ static Node *top() {
 Vector *parse(Vector *tk) {
     tokens = tk;
     Vector *v = new_vector();
-    vars = new_map();
     globals_counter = 0;
-    int toplevel_counter = 0;
 
     while (GET_TK(tokens, pos)->ty != TK_EOF) {
         vec_push(v, top());
-        ((Node* )v->data[toplevel_counter])->stacksize = stacksize;
-        toplevel_counter++;
     }
     return v;
 }

@@ -209,3 +209,9 @@ try 2 'int main() { int i=3; --i;}'
 try 1 'int main() { int ary[2]; ary[0]=1; ary[1]=2; int *p=ary; return *p++; }'
 try 2 'int main() { int ary[2]; ary[0]=1; ary[1]=2; int *p=ary; *p++; return *p; }'
 try 2 'int main() { int ary[2]; ary[0]=1; ary[1]=2; int *p=ary; return *++p; }'
+
+try 1 'int main() { int x = 1; {int x = 2;} return x;}'
+try 3 'int main() { int x = 1; int y = 2; {int x = 2; int y = 3;} return x+y;}'
+try 5 'int main() { int a=1; return 3 + ({ int a = 2; int b; int c; int d; a; }); }'
+
+echo 'OK!'

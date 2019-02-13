@@ -108,6 +108,8 @@ enum {
     ND_ALIGNOF,     // alignof
     ND_IDENT,       // Identifier
     ND_VAR_DEF,     // Variable definition
+    ND_LVAR,        // Local variable
+    ND_GVAR,        // Global variable
     ND_IF,          // if
     ND_WHILE,       // while
     ND_DO_WHILE,    // do ~ while
@@ -160,6 +162,9 @@ typedef struct Node {
     char *data;
     int len;
 
+    // Local variable
+    int offset;
+
     // If
     struct Node *bl_expr;
     struct Node *tr_stmt;
@@ -174,7 +179,7 @@ Vector *parse(Vector *tk);
 Vector *tokenize(char *p);
 
 // semantic_analysis.c
-Vector *sema(Vector *nodes);
+Vector *sema(Vector *nodes, Vector *global_vars);
 
 // container.c
 void error(char *fmt, ...);
@@ -195,4 +200,4 @@ Node *addr_of(Node *base, Type *cty);
 
 // codegen.c
 void gen(Node *node, ...);
-void gen_x86(Vector *code);
+void gen_x86(Vector *code, Vector *global_vars);
