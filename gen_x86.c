@@ -290,10 +290,13 @@ void gen(Node *node, ...) {
             printf("    and rax, 0xFF\n");
         } else
             printf("    mov rax, [rax]\n");
+        int num = 1;
+        if (node->expr->cty->ty == PTR)
+            num = align_of(node->expr->cty->ptrof);
         if (node->ty == ND_PRE_INC)
-            printf("    add rax, 1\n");
+            printf("    add rax, %d\n", num);
         else if (node->ty == ND_PRE_DEC)
-            printf("    sub rax, 1\n");        
+            printf("    sub rax, %d\n", num);        
         printf("    pop rdx\n");
         printf("    mov [rdx], rax\n");
 
@@ -313,10 +316,13 @@ void gen(Node *node, ...) {
             printf("    and rax, 0xFF\n");
         } else
             printf("    mov rax, [rax]\n");
+        int num = 1;
+        if (node->expr->cty->ty == PTR)
+            num = align_of(node->expr->cty->ptrof);
         if (node->ty == ND_POST_INC)
-            printf("    add rax, 1\n");
+            printf("    add rax, %d\n", num);
         else if (node->ty == ND_POST_DEC)
-            printf("    sub rax, 1\n");        
+            printf("    sub rax, %d\n", num);        
         printf("    pop rdx\n");
         printf("    mov [rdx], rax\n");
 
