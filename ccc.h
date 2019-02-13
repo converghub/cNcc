@@ -75,7 +75,7 @@ typedef struct Type {
     int ty;
 
     // Pointer
-    struct Type *ptrof;
+    struct Type *ptrto;
 
     // Array
     struct Type *aryof;
@@ -191,7 +191,7 @@ Map *new_map();
 void map_put(Map *map, char *key, void *val);
 void *map_get(Map *map, char *key);
 bool map_exist(Map *map, char *key);
-Type *ptr_of (Type *base);
+Type *ptr_to (Type *base);
 int size_of(Type *cty);
 int align_of(Type *cty);
 Type *ary_of(Type *base, int len);

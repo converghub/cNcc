@@ -288,7 +288,7 @@ void gen(Node *node, ...) {
             printf("    mov rax, [rax]\n");
         int num = 1;
         if (node->expr->cty->ty == PTR)
-            num = align_of(node->expr->cty->ptrof);
+            num = align_of(node->expr->cty->ptrto);
         if (node->ty == ND_PRE_INC)
             printf("    add rax, %d\n", num);
         else if (node->ty == ND_PRE_DEC)
@@ -314,7 +314,7 @@ void gen(Node *node, ...) {
             printf("    mov rax, [rax]\n");
         int num = 1;
         if (node->expr->cty->ty == PTR)
-            num = align_of(node->expr->cty->ptrof);
+            num = align_of(node->expr->cty->ptrto);
         if (node->ty == ND_POST_INC)
             printf("    add rax, %d\n", num);
         else if (node->ty == ND_POST_DEC)
@@ -403,7 +403,7 @@ void gen(Node *node, ...) {
                 if (node->rhs->cty->ty == ARY) 
                     coeff = align_of(node->rhs->cty);
                 else
-                    coeff = align_of(node->rhs->cty->ptrof);
+                    coeff = align_of(node->rhs->cty->ptrto);
                 printf("    mov rdi, %d\n", coeff);
                 printf("    mul rdi\n");
                 printf("    pop rdi\n");                
@@ -414,7 +414,7 @@ void gen(Node *node, ...) {
                 if (node->lhs->cty->ty == ARY) 
                     coeff = align_of(node->lhs->cty);
                 else
-                    coeff = align_of(node->lhs->cty->ptrof);                
+                    coeff = align_of(node->lhs->cty->ptrto);                
                 printf("    mov rdi, %d\n", coeff);
                 printf("    mul rdi\n");
                 printf("    mov rdi, rax\n");
@@ -432,7 +432,7 @@ void gen(Node *node, ...) {
                 if (node->lhs->cty->ty == ARY) 
                     coeff = align_of(node->lhs->cty);
                 else
-                    coeff = align_of(node->lhs->cty->ptrof);  
+                    coeff = align_of(node->lhs->cty->ptrto);  
                 printf("    mov rdi, %d\n",  coeff);
                 printf("    mul rdi\n");
                 printf("    mov rdi, rax\n");

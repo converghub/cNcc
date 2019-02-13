@@ -42,7 +42,7 @@ static Type *ctype() {
     
     pos++;
     while (consume('*'))
-        cty = ptr_of(cty);
+        cty = ptr_to(cty);
     return cty;
 }
 

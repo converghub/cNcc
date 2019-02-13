@@ -155,13 +155,13 @@ static Node *walk(Node *node,...) {
         case ND_ADDR:
             node->expr = walk(node->expr);
             check_lval(node->expr);
-            node->cty = ptr_of(node->expr->cty);
+            node->cty = ptr_to(node->expr->cty);
             return node;
         case ND_DEREF:
             node->expr = walk(node->expr);
             if (node->expr->cty->ty != PTR)
                 error("sema(): operand must be a pointer");   
-            node->cty = node->expr->cty->ptrof;
+            node->cty = node->expr->cty->ptrto;
             return node;
         case ND_PRE_INC:
         case ND_PRE_DEC:

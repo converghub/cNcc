@@ -77,10 +77,10 @@ bool map_exist(Map *map, char *key) {
 
 
 //
-Type *ptr_of(Type *base) {
+Type *ptr_to(Type *base) {
     Type *ctype = malloc(sizeof(Type));
     ctype->ty = PTR;
-    ctype->ptrof = base;
+    ctype->ptrto = base;
     return ctype;
 }
 
@@ -129,7 +129,7 @@ int align_of(Type *cty) {
 Node *addr_of(Node *base, Type *cty) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_ADDR;
-    node->cty = ptr_of(cty);
+    node->cty = ptr_to(cty);
     node->expr = base;
     return node;
 }
