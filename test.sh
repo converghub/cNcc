@@ -3,9 +3,9 @@ try() {
   expected="$1"
   input="$2"
 
-  ./ccc "$input" > tmp.s
-  gcc -o tmp tmp.s tmp-test.o
-  ./tmp
+  ./ccc "$input" > tmp-legacy.s
+  gcc -o tmp-legacy-test tmp-legacy.s tmp-test.o
+  ./tmp-legacy-test
   actual="$?"
 
   if [ "$actual" = "$expected" ]; then
@@ -103,6 +103,8 @@ try 11 'int main() { return 100 ^ 111; }'
 # ref: https://en.wikipedia.org/wiki/Comma_operator
 try 3 'int main() { return (1,2,3); }'
 try 3 'int main() { return (1),2,3; }'
+# TODO: This should be compiled
+#try 3 'int main() { return ({ int a; a = (1,2,3); a; }); }'
 try 3 'int main() { return 1 ? 3 : 5; }'
 try 5 'int main() { return 0 ? 3 : 5; }'
 

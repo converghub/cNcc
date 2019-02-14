@@ -15,7 +15,7 @@ Vector *strings;
 static void expect(int ty) {
     Token *t = tokens->data[pos];
     if (t->ty != ty)
-        error("%c (%d) expected, but got %c (%d)", ty, ty, t->ty, t->ty);    
+        error("%c (%d) expected, but got %c (%d). input: %s.", ty, ty, t->ty, t->ty, t->input);    
     pos++;
 }
 

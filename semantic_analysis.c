@@ -254,6 +254,7 @@ Vector *sema(Vector *nodes, Vector *global_vars) {
         if (node->ty == ND_VAR_DEF) {
             // global variables
             Var *var = new_global(node->cty, node->name, node->data, node->len);
+            var->is_extern = node->is_extern;
             vec_push(global_vars, var);
             map_put(blk->vars, node->name, var);
             continue;
