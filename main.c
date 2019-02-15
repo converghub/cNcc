@@ -71,7 +71,9 @@ static char *read_file(char *filename) {
     // malloc buffer and read
     input = malloc(file_size);
     fread(input, 1, file_size, fp);
-
     fclose(fp);
+
+    fprintf(stderr, "file_size : %ld\n", file_size);
+
     return input;
 }

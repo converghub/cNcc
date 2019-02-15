@@ -38,7 +38,8 @@ static Type *get_ctype() {
 static Type *ctype() {
     Type *cty = get_ctype();
     if (!cty)
-        error("ctype(): Typename expected, but got %s\n", GET_TK(tokens, pos)->input);
+        error("ctype(): Typename expected, but got %s. tokens pos = %d.\n",
+            GET_TK(tokens, pos)->input, pos);
     
     pos++;
     while (consume('*'))
@@ -424,6 +425,8 @@ static Node* decl() {
     // TODO: add commas act as seperators in this line, not as an operator
     if (consume('='))
         node->init = assign();
+    else
+        node->init = NULL;
     return node;
 }
 
@@ -568,8 +571,10 @@ static Node *top() {
             else
                 error("function(): Argument type expected, but got %s.\n", GET_TK(tokens, pos)->input);
 
-            ((Node *)node->args->data[argc])->ty = ND_VAR_DEF;
-            ((Node *)node->args->data[argc])->cty = arg_cty;
+            Node *argument = node->args->data[argc];
+            argument->ty = ND_VAR_DEF;
+            argument->cty = arg_cty;
+            argument->init = NULL;
             argc++;
 
             if (consume(',')) {
@@ -584,7 +589,10 @@ static Node *top() {
         expect('}');
     
     // String literal
-    node->strings = strings;
+    if (strings->len != 0)
+        node->strings = strings;
+    else
+        node->strings = NULL;    
     return node;
     }
 
@@ -598,8 +606,9 @@ static Node *top() {
         node->len = size_of(node->cty);
         node->is_extern = false;
     }
-
+    node->strings = NULL;
     expect(';');
+
     return node;
 }
 

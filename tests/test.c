@@ -18,7 +18,7 @@ extern int global_arr[1];
 
 int one() { return 1; }
 int two() { return 2; }
-//int plus(int x, int y) { return x + y; }
+int plus(int x, int y) { return x + y; }
 int mul(int x, int y) { return x * y; }
 int add(int a,int b,int c,int d,int e,int f) { return a+b+c+d+e+f; }
 
@@ -43,17 +43,17 @@ int main() {
     EXPECT(2, ({int a_2 = 1; a_2+1;}) );
 
     EXPECT(1, one());
-/* FIX THIS: Segmentation fault occurs if the followings are uncommented. */
-//    EXPECT(7, plus(2, 5));
+    EXPECT(7, plus(2, 5));
     EXPECT(3, one() + two());
     EXPECT(6, mul(2, 3));
-//    EXPECT(21, add(1,2,3,4,5,6));
-//    EXPECT(2, ({ int a; if(1) a=2; else a=3; a;}) );
-//    EXPECT(3, ({ int a; if(0) a=2; else a=3; a;}) );
-//    EXPECT(3, ({ int a; if(0) a=2; else a=3; a;}) );
-//    EXPECT(3, ({ int a; if(0) a=2; else a=3; a;}) );
-//    EXPECT(3, ({ int a; if(0) a=2; else a=3; a;}) );
-//    EXPECT(4, ({ int a; if(1) a=mul(2,2); else a=3; a;}) );
+    EXPECT(21, add(1,2,3,4,5,6));
+
+    EXPECT(2, ({ int a; if(1) a=2; else a=3; a;}) );
+    EXPECT(3, ({ int a; if(0) a=2; else a=3; a;}) );
+    EXPECT(3, ({ int a; if(0) a=2; else a=3; a;}) );
+    EXPECT(3, ({ int a; if(0) a=2; else a=3; a;}) );
+    EXPECT(3, ({ int a; if(0) a=2; else a=3; a;}) );
+    EXPECT(4, ({ int a; if(1) a=mul(2,2); else a=3; a;}) );
 
     EXPECT(0, 1 < 0);
     EXPECT(1, 0 < 1);
@@ -98,6 +98,9 @@ int main() {
     EXPECT(60, ({ int sum=0; for (int i=10; i<15; i=i+1) {sum = sum + i; sum = sum + 0;} sum; }) );
 
     EXPECT(97, ({ char *p = "abc"; p[0]; }));
+    EXPECT(98, ({ char *p = "abc"; p[1]; }));
+    EXPECT(99, ({ char *p = "abc"; p[2]; }));
+
     // TODO: The followings should be compiled correctly
     /*
     EXPECT(3, (1, 2, 3));
