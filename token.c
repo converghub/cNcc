@@ -52,14 +52,21 @@ loop:
             continue;
         }
 
+
         // String literal
         if (*p == '"') {
             Token *t = add_token(v, TK_STR, p);
             p++;
 
             int len = 0;
-            while(p[len] && p[len] != '"')
+            while(p[len] && p[len] != '"') {
+
+                if (p[len] == '\\' && p[len+1] == '"') {
+                    len+=2;
+                    continue;
+                }
                 len++;
+            }
             if (!p[len])
                 error("tokenize(): incorrect end of string literal. %s", p);
             t->str = strndup(p, len);
@@ -109,7 +116,7 @@ loop:
             continue;
         }
 
-        error("tokenize(): Cannot tokenize %s\n", p);
+        error("tokenize(): Cannot tokenize->%s\n", p);
     }
 
     add_token(v, TK_EOF, p);

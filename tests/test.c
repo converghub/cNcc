@@ -97,7 +97,7 @@ int main() {
     EXPECT(60, ({ int sum=0; for (int i=10; i<15; i=i+1) sum = sum + i; sum; }) );
     EXPECT(60, ({ int sum=0; for (int i=10; i<15; i=i+1) {sum = sum + i; sum = sum + 0;} sum; }) );
 
-
+    EXPECT(97, ({ char *p = "abc"; p[0]; }));
     // TODO: The followings should be compiled correctly
     /*
     EXPECT(3, (1, 2, 3));

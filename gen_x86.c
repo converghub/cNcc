@@ -287,7 +287,13 @@ void gen(Node *node, ...) {
     if (node->ty == ND_DEREF) {
         gen(node->expr);
         printf("    pop rax\n");
-        printf("    mov rax, [rax]\n");
+        if (align_of(node->expr->cty->ptrto) == 4) {
+            printf("    mov eax, [rax]\n");  
+        } else if (align_of(node->expr->cty->ptrto) == 1) {
+            printf("    mov al, [rax]\n");
+            printf("    and rax, 0xFF\n");            
+        } else 
+            printf("    mov rax, [rax]\n");
         printf("    push rax\n");
         return;
     }
