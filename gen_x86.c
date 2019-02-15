@@ -253,6 +253,7 @@ void gen(Node *node, ...) {
 
         printf("    mov rbx, rsp\n");
         printf("    and rsp, ~0x0f\n");
+        printf("    mov rax, 0\n");
         printf("    call %s\n", node->name);
         printf("    mov rsp, rbx\n");
         printf("    push rax\n");

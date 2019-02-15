@@ -16,18 +16,33 @@ static struct symbol{
     int ty;
 } symbols[] = {
     {"==", TK_EQ},         {"!=", TK_NE},            {"&&", TK_LAND}, 
-    {"||", TK_LOR},        {"if", TK_IF},            {"else", TK_ELSE},
-    {"return", TK_RETURN}, {"while", TK_WHILE},      {"for", TK_FOR},
-    {"int", TK_INT},       {"char", TK_CHAR},        {"sizeof", TK_SIZEOF},
-    {"extern", TK_EXTERN}, {"do", TK_DO},            {"<=", TK_LE},
+    {"||", TK_LOR},        {"<=", TK_LE},
     {">=", TK_GE},         {"_Alignof", TK_ALIGNOF}, {"<<", TK_SHL},
     {">>", TK_SHR},        {"++", TK_INC},           {"--", TK_DEC},
 };
 
 
+static Map *new_keywords() {
+    Map *map = new_map();
+    map_puti(map, "if", TK_IF);
+    map_puti(map, "else", TK_ELSE);
+    map_puti(map, "return", TK_RETURN);
+    map_puti(map, "while", TK_WHILE);
+    map_puti(map, "for", TK_FOR);
+    map_puti(map, "int", TK_INT);
+    map_puti(map, "char", TK_CHAR);
+    map_puti(map, "sizeof", TK_SIZEOF);
+    map_puti(map, "extern", TK_EXTERN);
+    map_puti(map, "do", TK_DO);
+    map_puti(map, "_Alignof", TK_ALIGNOF);
+    return map;
+}
+
+
 // Tokenize input 
 Vector *tokenize(char *p) {
     Vector *v = new_vector();
+    Map *keywords = new_keywords();
 
 loop:
     while (*p) {
@@ -53,7 +68,7 @@ loop:
             continue;
         }
 
-        // Multi-letter symbol/keyword
+        // Multi-letter symbol
         for (int i = 0; i < SYMBOL_NUMBER; i++) {
             char *name = symbols[i].name;
             int len = strlen(name);
@@ -66,21 +81,24 @@ loop:
             goto loop;
         }
 
-        // Single-letter token
+        // Single-letter symbol
         if (strchr("+-*/=;(),{}><&[]|!^?:~%", *p)) {
             add_token(v, *p, p);
             p++;
             continue;
         }
 
-        // Identifier
+        // Keyword / Identifier
         if (isalpha(*p) || *p == '_') {
             int len = 1;
             while (isalpha(p[len]) || isdigit(p[len]) || p[len] == '_' )
                 len++;
 
-            Token *t = add_token(v, TK_IDENT, p);
-            t->name = strndup(p, len);
+            char *name = strndup(p, len);
+            int ty = map_geti(keywords, name, -1);
+
+            Token *t = add_token(v, (ty == -1) ? TK_IDENT : ty, p);
+            t->name = name;
             p += len;
             continue;
         }
