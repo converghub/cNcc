@@ -21,4 +21,4 @@ test: ccc tests/test.c
 	@./tmp-test
 
 clean:
-	rm -f ccc *.o *~ tmp* test/*~ a.out
+	rm -f ccc *.o *~ tmp* test/*~ a.out *log*.txt

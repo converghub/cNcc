@@ -31,6 +31,7 @@ int main(int argc, char** argv) {
         input = read_file(filename);
     // tokenize
     Vector *tokens = tokenize(input);
+    dump_tokens(tokens);
     // parse
     Vector *nodes = parse(tokens);
     // semantic analysis

@@ -57,8 +57,11 @@ enum {
 typedef struct {
     int ty;
     int val;
-    char *str;      // String literal
-    char *name;     // Identifier
+    // String literal
+    char *str;
+
+    // Identifier
+    char *name;     
     char *input;
 } Token;
 
@@ -199,6 +202,9 @@ int align_of(Type *cty);
 Type *ary_of(Type *base, int len);
 Type *ctype_of_ary(Type *cty);
 Node *addr_of(Node *base, Type *cty);
+
+// logger.c
+void dump_tokens(Vector *tks);
 
 // codegen.c
 void gen(Node *node, ...);
