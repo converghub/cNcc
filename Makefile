@@ -17,7 +17,7 @@ test: ccc tests/test.c
 	@gcc -E -P tests/test.c > tmp-test.tmp
 	@./ccc -file tmp-test.tmp > tmp.s
 	@echo 'int global_arr[1]={5};' | gcc -xc -c -o tmp-test.o -
-	@gcc -static -o tmp-test tmp.s tmp-test.o
+	@gcc -static -g -o tmp-test tmp.s tmp-test.o
 	@./tmp-test
 
 clean:

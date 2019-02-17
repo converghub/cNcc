@@ -21,7 +21,8 @@ int two() { return 2; }
 int plus(int x, int y) { return x + y; }
 int mul(int x, int y) { return x * y; }
 int add(int a,int b,int c,int d,int e,int f) { return a+b+c+d+e+f; }
-
+int f(int a) { return 2*a; }
+int f2(int a, int b) { return 2*a+b; }
 
 int main() {
     EXPECT(0, 0);
@@ -97,9 +98,46 @@ int main() {
     EXPECT(60, ({ int sum=0; for (int i=10; i<15; i=i+1) sum = sum + i; sum; }) );
     EXPECT(60, ({ int sum=0; for (int i=10; i<15; i=i+1) {sum = sum + i; sum = sum + 0;} sum; }) );
 
+    EXPECT(4, ({ int b; int c = f(f(b=1)); c; }) );
+    EXPECT(9, ({ int e; int f; int d = 1; int c = f2( f2(d, e=1), f2(1, f=1) ); c; }) );
+
+    EXPECT(5, ({ int x; int *p = &x; x = 5; *p; }) );
+    EXPECT(1, ({ int a[3]; *a = 1; *a; }) );    
+    EXPECT(2, ({ int a[3]; *(1+a) = 2; *(a+1); }) );    
+    EXPECT(6, ({ int ary[3]; *ary=1; *(ary+1)=2; *(ary+2) = 3; *ary + *(ary+1) + *(ary+2); }) );
+
+    EXPECT(4, ({ int x; sizeof(x); }) );
+    EXPECT(8, ({ int *x; sizeof(x); }) );
+    EXPECT(16, ({ int x[4]; sizeof(x); }) );
+    EXPECT(1, ({ char x; _Alignof(x); }) );
+    EXPECT(4, ({ int x; _Alignof(x); }) );
+    EXPECT(8, ({ int *x; _Alignof(x); }) );
+    EXPECT(4, ({ int x[4]; _Alignof(x); }) );
+    EXPECT(8, ({ int *x[4]; _Alignof(x); }) );
+
+    EXPECT(5, ({ int x; int *p = &x; x = 5; p[0]; }) );
+    EXPECT(3, ({ int ary[2]; ary[0]=1; ary[1]=2; ary[0] + ary[1]; }) );
+    EXPECT(3, ({ int ary[2]; ary[0]=1; ary[1]=2; ary[0] + ary[1*1*1+1*1+0-1]; }) );
+
     EXPECT(97, ({ char *p = "abc"; p[0]; }));
     EXPECT(98, ({ char *p = "abc"; p[1]; }));
     EXPECT(99, ({ char *p = "abc"; p[2]; }));
+    EXPECT(0, ({ char *p = "abc"; p[3]; }) );
+
+    EXPECT(5, ({ global_arr[0]; }) );
+
+    EXPECT(1, ({ ; 1; }) );
+
+    EXPECT(3, ({ int i=3; i++; }) );
+    EXPECT(3, ({ int i=3; i--; }) );
+    EXPECT(4, ({ int i=3; ++i; }) );   
+    EXPECT(2, ({ int i=3; --i; }) );
+    EXPECT(1, ({ int ary[2]; ary[0]=1; ary[1]=2; int *p=ary; *p++; }) );
+    EXPECT(2, ({ int ary[2]; ary[0]=1; ary[1]=2; int *p=ary; *++p; }) );
+
+    EXPECT(1, ({ int x=1; {int x=2;} x; }) );
+    EXPECT(3, ({ int x=1; int y=2; {int x=2; int y=3;} x+y; }) );
+    EXPECT(5, ({ int a=1; 3 + ({ int a=2; int b; int c; int d; a; }); }) );
 
     // TODO: The followings should be compiled correctly
     /*

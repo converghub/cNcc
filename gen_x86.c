@@ -305,6 +305,7 @@ void gen(Node *node, ...) {
 
     if (node->ty == ND_PRE_INC || node->ty == ND_PRE_DEC) {
         gen(node->expr);
+        printf("    pop rax\n");
         gen_lval(node->expr);
         if (size_of(node->cty) == 4) {
             printf("    mov eax, [rax]\n");  
