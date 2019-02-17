@@ -150,6 +150,8 @@ typedef struct Node {
     struct Node *expr;      // for ND_RETURN, ND_DEREF, ND_SIZEOF
     struct Node *stmt_expr; // for ND_STMT_EXPR
     Vector *stmts;          // for ND_CMPD_STMT
+    struct Node *pfunc;     // pointer to parent function
+    struct Node *upper;     // pointer to upper node
 
     // Function
     Vector *args;           // for Function call arguments
@@ -207,5 +209,5 @@ Node *addr_of(Node *base, Type *cty);
 void dump_tokens(Vector *tks);
 
 // codegen.c
-void gen(Node *node, ...);
+void gen(Node *node);
 void gen_x86(Vector *code, Vector *global_vars);

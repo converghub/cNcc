@@ -25,12 +25,7 @@ static void gen_lval(Node *node) {
     return;
 }
 
-void gen(Node *node, ...) {
-    va_list parent_node;
-    va_start(parent_node, node);
-
-    if (node->ty == ND_NULL)
-        return;
+void gen(Node *node) {
     if (node->ty == ND_FUNC_DEF) {
         printf(".global %s\n", node->name);
         printf("%s:\n", node->name);
@@ -57,7 +52,7 @@ void gen(Node *node, ...) {
 
         // Body
         for (int i = 0; i < node->body->stmts->len; i++) {
-            gen(node->body->stmts->data[i], node);
+            gen(node->body->stmts->data[i]);
         }
 
         printf(".%s_end:\n", node->name);
@@ -71,32 +66,31 @@ void gen(Node *node, ...) {
         return;
     }
 
+    if (node->ty == ND_NULL)
+        return;    
+
     if (node->ty == ND_EXPR_STMT) {
-        Node *parent = va_arg(parent_node, Node*); 
-        gen(node->expr, parent);
+        gen(node->expr);
         return;
     }
 
     if (node->ty == ND_CMPD_STMT) {
-        Node *parent = va_arg(parent_node, Node*); 
         for (int i = 0; i < node->stmts->len; i++)
-            gen(node->stmts->data[i], parent);
+            gen(node->stmts->data[i]);
         return;
     }
 
     if (node->ty == ND_STMT_EXPR) {
-        Node *parent = va_arg(parent_node, Node*); 
         Node *expr_node = node->stmt_expr;
         for (int i = 0; i < expr_node->stmts->len; i++) {
-            gen(expr_node->stmts->data[i], parent);
+            gen(expr_node->stmts->data[i]);
         }
         return;
     }
 
     if (node->ty == ND_IF) {
         int if_else_label = label_counter++;
-        Node *parent = va_arg(parent_node, Node*); 
-        gen(node->bl_expr, parent);
+        gen(node->bl_expr);
 
         printf("    pop rax\n");
         printf("    cmp rax, 0\n");
@@ -104,9 +98,9 @@ void gen(Node *node, ...) {
 
         if (node->tr_stmt->stmts != NULL) {
             for (int i = 0; i < node->tr_stmt->stmts->len; i++) 
-                gen(node->tr_stmt->stmts->data[i], parent);
+                gen(node->tr_stmt->stmts->data[i]);
         } else {
-            gen(node->tr_stmt, parent);
+            gen(node->tr_stmt);
         }
         printf("    jmp .if_end_%d\n", if_else_label);
 
@@ -114,9 +108,9 @@ void gen(Node *node, ...) {
         if (node->els_stmt != NULL) {
             if (node->els_stmt->stmts != NULL) {
                 for (int i = 0; i < node->els_stmt->stmts->len; i++) 
-                    gen(node->els_stmt->stmts->data[i], parent);
+                    gen(node->els_stmt->stmts->data[i]);
             } else {
-                gen(node->els_stmt, parent);
+                gen(node->els_stmt);
             }
         }
         printf(".if_end_%d:\n", if_else_label);
@@ -126,19 +120,18 @@ void gen(Node *node, ...) {
     if (node->ty == ND_WHILE) {
         int while_label = label_counter++;
         int while_end = label_counter++;
-        Node *parent = va_arg(parent_node, Node*); 
 
         printf(".while_%d:\n", while_label);
-        gen(node->bl_expr, parent);
+        gen(node->bl_expr);
         printf("    pop rax\n");
         printf("    cmp rax, 0\n");
         printf("    je .while_end_%d\n", while_end);
 
         if (node->body->stmts != NULL) {
             for (int i = 0; i < node->body->stmts->len; i++)
-                gen(node->body->stmts->data[i], parent);
+                gen(node->body->stmts->data[i]);
         } else {
-            gen(node->body, parent);
+            gen(node->body);
         }
 
         printf("    jmp .while_%d\n", while_label);
@@ -149,18 +142,17 @@ void gen(Node *node, ...) {
     if (node->ty == ND_DO_WHILE) {
         int do_while_label = label_counter++;
         int do_while_end = label_counter++;
-        Node *parent = va_arg(parent_node, Node*);
 
         printf(".do_while_%d:\n", do_while_label);
 
         if (node->body->stmts != NULL) {
             for (int i = 0; i < node->body->stmts->len; i++)
-                gen(node->body->stmts->data[i], parent);
+                gen(node->body->stmts->data[i]);
         } else {
-            gen(node->body, parent);
+            gen(node->body);
         }
 
-        gen(node->bl_expr, parent);
+        gen(node->bl_expr);
         printf("    pop rax\n");
         printf("    cmp rax, 0\n");
         printf("    je .do_while_end_%d\n", do_while_end);
@@ -173,24 +165,23 @@ void gen(Node *node, ...) {
     if (node->ty == ND_FOR) {
         int for_label = label_counter++;
         int for_end = label_counter++;
-        Node *parent = va_arg(parent_node, Node*);
 
-        gen(node->init, parent);
+        gen(node->init);
 
         printf(".for_%d:\n", for_label);
-        gen(node->bl_expr, parent);
+        gen(node->bl_expr);
         printf("    pop rax\n");
         printf("    cmp rax, 0\n");
         printf("    je .for_end_%d\n", for_end);
 
         if (node->body->stmts != NULL) {
             for (int i = 0; i < node->body->stmts->len; i++)
-                gen(node->body->stmts->data[i], parent);
+                gen(node->body->stmts->data[i]);
         } else {
-            gen(node->body, parent);
+            gen(node->body);
         }
 
-        gen(node->inc, parent);
+        gen(node->inc);
         printf("    jmp .for_%d\n", for_label);
         printf(".for_end_%d:\n", for_end);
         return;
@@ -224,12 +215,10 @@ void gen(Node *node, ...) {
     }
 
     if (node->ty == ND_VAR_DEF) {
-        Node *parent = va_arg(parent_node, Node*);
-
         if (node->init == NULL) 
             return;
         gen_lval(node);
-        gen(node->init, parent);
+        gen(node->init);
         printf("    pop rdi\n");
         printf("    pop rax\n");
 
@@ -244,7 +233,7 @@ void gen(Node *node, ...) {
 
     if (node->ty == ND_FUNC_CALL) {
         for (int i = 0; i < node->args->len; i++) {
-           gen(node->args->data[i], node);
+           gen(node->args->data[i]);
         }
 
         for (int i = node->args->len - 1; i >= 0; i--) {
@@ -262,9 +251,8 @@ void gen(Node *node, ...) {
 
 
     if (node->ty == '=') {
-        Node *parent = va_arg(parent_node, Node*);
         gen_lval(node->lhs);
-        gen(node->rhs, node);
+        gen(node->rhs);
 
         printf("    pop rdi\n");
         printf("    pop rax\n");
@@ -278,7 +266,7 @@ void gen(Node *node, ...) {
             printf("    mov [rax], rdi\n");
 
         // for example, if "a=b=c...", "func(a=1)"
-        if (parent->ty == '=' || parent->ty == ND_FUNC_CALL) 
+        if (node->upper->ty == '=' || node->upper->ty == ND_FUNC_CALL) 
             printf("    push rdi\n");
 
         return;
@@ -391,9 +379,9 @@ void gen(Node *node, ...) {
 
         if (node->tr_stmt->stmts != NULL) {
             for (int i = 0; i < node->tr_stmt->stmts->len; i++) 
-                gen(node->tr_stmt->stmts->data[i], va_arg(parent_node, Node*));
+                gen(node->tr_stmt->stmts->data[i]);
         } else {
-            gen(node->tr_stmt, va_arg(parent_node, Node*));
+            gen(node->tr_stmt);
         }
         printf("    jmp .cndtnl_end_%d\n", cndtnl_label);
 
@@ -401,9 +389,9 @@ void gen(Node *node, ...) {
         if (node->els_stmt != NULL) {
             if (node->els_stmt->stmts != NULL) {
                 for (int i = 0; i < node->els_stmt->stmts->len; i++) 
-                    gen(node->els_stmt->stmts->data[i], va_arg(parent_node, Node*));
+                    gen(node->els_stmt->stmts->data[i]);
             } else {
-                gen(node->els_stmt, va_arg(parent_node, Node*));
+                gen(node->els_stmt);
             }
         }
         printf(".cndtnl_end_%d:\n", cndtnl_label);
@@ -412,7 +400,7 @@ void gen(Node *node, ...) {
 
     if (node->ty == ND_RETURN) {
         gen(node->expr);
-        printf("    jmp .%s_end\n", va_arg(parent_node, Node*)->name);
+        printf("    jmp .%s_end\n", node->pfunc->name);
         return;
     }
 
