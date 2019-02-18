@@ -455,7 +455,8 @@ static Node *stmt() {
             } else {
                 node->els_stmt = stmt();
             }
-        }
+        } else
+            node->els_stmt = NULL;
         return node;
 
     } else if (GET_TK(tokens, pos)->ty == TK_INT || GET_TK(tokens, pos)->ty == TK_CHAR) {
@@ -602,7 +603,7 @@ static Node *top() {
     if (is_extern) {
         node->is_extern = true;
     } else {
-        node->data = malloc(size_of(node->cty));
+        node->data = calloc(1, size_of(node->cty));
         node->len = size_of(node->cty);
         node->is_extern = false;
     }

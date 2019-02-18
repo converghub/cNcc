@@ -139,6 +139,10 @@ int main() {
     EXPECT(3, ({ int x=1; int y=2; {int x=2; int y=3;} x+y; }) );
     EXPECT(5, ({ int a=1; 3 + ({ int a=2; int b; int c; int d; a; }); }) );
 
+    EXPECT(8, ({ 1; 1+1; 1+2+5; }) );
+    EXPECT(8, ({ 1; {1+1;} 1+2+5; }) );
+    EXPECT(8, ({ 1+2; { ({1;}); } {({1;});} 1+2+5; }) );
+
     // TODO: The followings should be compiled correctly
     /*
     EXPECT(3, (1, 2, 3));

@@ -149,9 +149,11 @@ typedef struct Node {
     char *name;             // for ND_IDENT
     struct Node *expr;      // for ND_RETURN, ND_DEREF, ND_SIZEOF
     struct Node *stmt_expr; // for ND_STMT_EXPR
+    bool is_last;           // last line or not of Statement expressions
     Vector *stmts;          // for ND_CMPD_STMT
     struct Node *pfunc;     // pointer to parent function
     struct Node *upper;     // pointer to upper node
+    bool no_push;           // push or not
 
     // Function
     Vector *args;           // for Function call arguments

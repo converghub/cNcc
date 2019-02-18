@@ -46,17 +46,224 @@ static void check_lval(Node *node) {
   error("not an lvalue: %d (%s)", ty, node->name);
 }
 
-static void set_inclusion(Node *self, Node *pfunc, Node *upper) {
-    self->pfunc = pfunc;
-    self->upper = upper;
-    return;
+static bool check_push(Node *node) {
+    if (node == NULL) 
+        error("check_push(): pointer to node is NULL.");
+    if (node->upper == NULL) 
+        error("check_push(): pointer to upper node is NULL.");
+
+    switch (node->ty) {
+        case ND_NUM:
+        case ND_SIZEOF:
+        case ND_ALIGNOF:
+            switch (node->upper->ty) {
+                case ND_EXPR_STMT:
+                    return check_push(node->upper);
+                case ND_FUNC_CALL:
+                case ND_VAR_DEF:
+                case ND_DO_WHILE:
+                case ND_IF:
+                case ND_RETURN:
+                case '!':
+                case '%':
+                case '*':
+                case '+':
+                case '-':
+                case '/':
+                case '<':
+                case '=':
+                case '>':
+                case '?':
+                case '^':
+                case '|':
+                case '~':
+                case ND_EQ:
+                case ND_NE:
+                case ND_LE:
+                case ND_GE:
+                case ND_LOR:
+                case ND_LAND:
+                case ND_SHL:
+                case ND_SHR:
+                    return false;
+            }
+            error("check_push() <- ND_NUM: Unknown upper %d, node->val = %d", node->upper->ty, node->val);
+        case ND_LVAR:
+        case ND_GVAR:
+            switch (node->upper->ty) {
+                case ND_EXPR_STMT:
+                    return check_push(node->upper);
+                case ND_FUNC_CALL:
+                case ND_DEREF:
+                case ND_ADDR:
+                case ND_RETURN:
+                case ND_SIZEOF:
+                case ND_ALIGNOF:
+                case '!':
+                case '%':
+                case '*':
+                case '+':
+                case '-':
+                case '/':
+                case '<':
+                case '=':
+                case '>':
+                case '?':
+                case '^':
+                case '|':
+                case '~':
+                case ND_EQ:
+                case ND_PRE_INC:
+                case ND_PRE_DEC:
+                case ND_POST_INC:
+                case ND_POST_DEC:
+                    return false;
+            }
+            error("check_push() <- ND_LVAR/ND_GVAR : Unknown upper %d", node->upper->ty);
+        case ND_EXPR_STMT:
+            switch (node->upper->ty) {
+                case ND_IF:
+                case ND_WHILE:
+                case ND_DO_WHILE:
+                case ND_FOR:  
+                    return false;
+                case ND_CMPD_STMT:
+                    return check_push(node->upper);
+                case ND_STMT_EXPR:
+                    if (node->is_last) return false;
+                    return true;
+            }
+            error("check_push() <- ND_EXPR_STMT: Unknown upper %d", node->upper->ty);
+        case ND_CMPD_STMT:
+            switch (node->upper->ty) {
+                case ND_FUNC_DEF:
+                case ND_IF:
+                case ND_WHILE:
+                case ND_DO_WHILE:
+                case ND_FOR:
+                    return false;
+                case ND_CMPD_STMT:
+                    return check_push(node->upper);
+                case ND_STMT_EXPR:
+                    if (node->is_last) return false;
+                    return true;
+            }
+            error("check_push() <- ND_CMPD_STMT: Unknown upper %d", node->upper->ty);
+        case ND_STMT_EXPR:
+            switch (node->upper->ty) {
+                case ND_EXPR_STMT:
+                    return check_push(node->upper);
+                case ND_VAR_DEF:
+                case '+':
+                case ND_RETURN:
+                    return false;
+            }
+            error("check_push() <- ND_STMT_EXPR: Unknown upper %d", node->upper->ty);
+        case ND_VAR_DEF:
+            switch (node->upper->ty) {
+                case ND_FUNC_DEF:
+                    return true;
+                case ND_FOR:
+                    return false;
+                case ND_CMPD_STMT:
+                    return check_push(node->upper);
+                case ND_STMT_EXPR:
+                    if (node->is_last) return false;
+                    return true;
+            }
+            error("check_push() <- ND_VAR_DEF: Unknown upper %d", node->upper->ty);
+        case ND_IF:
+        case ND_WHILE:
+        case ND_DO_WHILE:
+        case ND_FOR:
+            switch (node->upper->ty) {
+                case ND_CMPD_STMT:
+                    return check_push(node->upper);
+                case ND_STMT_EXPR:
+                    if (node->is_last) return false;
+                    return true;
+            }
+            error("check_push() <- ND_IF: Unknown upper %d", node->upper->ty);
+        case ND_FUNC_CALL:
+        case ND_DEREF:
+        case '!':   
+        case '%':
+        case '*':
+        case '+':
+        case '-':
+        case '/':
+        case '<':
+        case '=':
+        case '>':
+        case '?':
+        case '^':
+        case '|':
+        case '~':
+        case ND_ADDR:
+        case ND_EQ:
+        case ND_NE:
+        case ND_LE:
+        case ND_GE:
+        case ND_LOR:
+        case ND_LAND:
+        case ND_SHL:
+        case ND_SHR:
+        case ND_PRE_INC:
+        case ND_PRE_DEC:
+        case ND_POST_INC:
+        case ND_POST_DEC:
+            switch (node->upper->ty) {
+                case ND_EXPR_STMT:
+                    return check_push(node->upper);
+                case ND_FUNC_CALL:
+                case ND_VAR_DEF:
+                case ND_IF:
+                case ND_WHILE:
+                case ND_DO_WHILE:
+                case ND_FOR:
+                case ND_DEREF:
+                case ND_RETURN:
+                case '%':
+                case '*':
+                case '+':
+                case '-':
+                case '/':
+                case '<':
+                case '=':
+                case '>':
+                case '?':
+                case '~':
+                case ND_EQ:
+                case ND_NE:
+                case ND_LE:
+                case ND_GE:
+                case ND_LOR:
+                case ND_LAND:
+                case ND_SHL:
+                case ND_SHR:
+                    return false;
+            }
+            error("check_push() <- Operation: Node->ty = %d. Unknown upper %d", node->ty, node->upper->ty);
+        case ND_RETURN:
+            switch (node->upper->ty) {
+                case ND_CMPD_STMT:
+                    return check_push(node->upper);
+            }            
+            error("check_push() <- ND_RETURN: Unknown upper %d", node->upper->ty);
+        default:
+            error("check_push() : Unknown node type coming: %d", node->ty);
+            exit(0);
+    }
 }
 
 static Node *walk(Node *node, Node *pfunc, Node *upper) {
-    set_inclusion(node, pfunc, upper);
-    
+    node->pfunc = pfunc;
+    node->upper = upper;
+    node->no_push = false;
+
     switch(node->ty) {
         case ND_NUM:
+            node->no_push = check_push(node);
             return node;
         case ND_STR:
             return node;
@@ -71,10 +278,14 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
             } else
                 node->ty = ND_GVAR;
 
-            if (sema_var->cty->ty == ARY && upper->ty != ND_SIZEOF && upper->ty != ND_ALIGNOF)
+            if (sema_var->cty->ty == ARY && upper->ty != ND_SIZEOF && upper->ty != ND_ALIGNOF) {
                 node = addr_of(node, sema_var->cty->aryof);
-            else
-                node->cty = sema_var->cty;         
+                node->pfunc = pfunc;
+                node->upper = upper;
+            } else
+                node->cty = sema_var->cty;   
+
+            node->no_push = check_push(node);      
             return node;
         }
         case ND_VAR_DEF: {
@@ -90,6 +301,8 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
 
             if (node->init)
                 node->init = walk(node->init, pfunc, node);
+            
+            node->no_push = check_push(node);
             return node;
         }
         case ND_IF:
@@ -97,23 +310,26 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
             node->tr_stmt = walk(node->tr_stmt, pfunc, node);
             if (node->els_stmt)
                 node->els_stmt = walk(node->els_stmt, pfunc, node);
+            node->no_push = check_push(node);
             return node;
         case ND_FOR:
             node->init = walk(node->init, pfunc, node);
             node->bl_expr = walk(node->bl_expr, pfunc, node);
             node->inc = walk(node->inc, pfunc, node);
             node->body = walk(node->body, pfunc, node);
+            node->no_push = check_push(node);
             return node;
         case ND_WHILE:
         case ND_DO_WHILE:
             node->bl_expr = walk(node->bl_expr, pfunc, node);
             node->body = walk(node->body, pfunc, node);
+            node->no_push = check_push(node);
             return node;
-        
         case '+':
         case '-':
             node->lhs = walk(node->lhs, pfunc, node);
             node->rhs = walk(node->rhs, pfunc, node);
+            node->no_push = check_push(node);
 
             if (node->lhs->cty->ty == PTR && node->rhs->cty->ty == PTR)
                 error("sema(): <pointer> %c <pointer> in not supported", node->ty);
@@ -129,12 +345,14 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
             check_lval(node->lhs);
             node->rhs = walk(node->rhs, pfunc, node);
             node->cty = node->lhs->cty;
+            node->no_push = check_push(node);
             return node;
         case '?':
             node->bl_expr = walk(node->bl_expr, pfunc, node);
             node->tr_stmt = walk(node->tr_stmt, pfunc, node);
             node->els_stmt = walk(node->els_stmt, pfunc, node);
             node->cty = node->tr_stmt->cty;
+            node->no_push = check_push(node);
             return node;
         case '*':
         case '/':
@@ -154,17 +372,20 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
             node->lhs = walk(node->lhs, pfunc, node);
             node->rhs = walk(node->rhs, pfunc, node);
             node->cty = node->lhs->cty;
+            node->no_push = check_push(node);
             return node;
         case ND_ADDR:
             node->expr = walk(node->expr, pfunc, node);
             check_lval(node->expr);
             node->cty = ptr_to(node->expr->cty);
+            node->no_push = check_push(node);
             return node;
         case ND_DEREF:
             node->expr = walk(node->expr, pfunc, node);
             if (node->expr->cty->ty != PTR)
                 error("sema(): operand must be a pointer");   
             node->cty = node->expr->cty->ptrto;
+            node->no_push = check_push(node);
             return node;
         case ND_PRE_INC:
         case ND_PRE_DEC:
@@ -174,11 +395,13 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
         case '~':
             node->expr = walk(node->expr, pfunc, node);
             node->cty = node->expr->cty;
+            node->no_push = check_push(node);
             return node;
         case ',':
             node->lhs = walk(node->lhs, pfunc, node);
             node->rhs = walk(node->rhs, pfunc, node);
             node->cty = node->rhs->cty;
+            node->no_push = check_push(node);
             return node;
         case ND_RETURN:
             node->expr = walk(node->expr, pfunc, node);
@@ -191,6 +414,7 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
             ret->cty = &int_cty;
             ret->val = size_of(node->expr->cty);
             node->expr = ret;
+            node->no_push = check_push(node);
             return node->expr;
         case ND_ALIGNOF:
             node->expr = walk(node->expr, pfunc, node);
@@ -200,6 +424,7 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
             ret1->cty = &int_cty;
             ret1->val = align_of(node->expr->cty);
             node->expr = ret1;
+            node->no_push = check_push(node);
             return node->expr;
         case ND_FUNC_DEF:
             for (int i = 0; i < node->args->len; i++)
@@ -211,22 +436,28 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
                 node->args->data[i] = walk(node->args->data[i], pfunc, node);
             // cutrrently only "int" is supported
             node->cty = &int_cty;
+            node->no_push = check_push(node);
             return node;
         case ND_CMPD_STMT:
             blk = new_blk(blk);
             for (int i = 0; i < node->stmts->len; i++)
                 node->stmts->data[i] = walk(node->stmts->data[i], pfunc, node);
+            node->no_push = check_push(node);
             blk = blk->superset;
             return node;
         case ND_EXPR_STMT:
             node->expr = walk(node->expr, pfunc, node);
             node->cty = node->expr->cty;
+            node->no_push = check_push(node);
             return node;
         case ND_STMT_EXPR: {
             blk = new_blk(blk);
             Node *expr_node = node->stmt_expr;
-            for (int i = 0; i < expr_node->stmts->len; i++)
+            for (int i = 0; i < expr_node->stmts->len; i++) {
+                if (i == expr_node->stmts->len - 1)
+                    ((Node *)expr_node->stmts->data[i])->is_last = true;
                 expr_node->stmts->data[i] = walk(expr_node->stmts->data[i], pfunc, node);        
+            }
 
             if (expr_node->stmts->len > 0) {
                 Node *last = expr_node->stmts->data[expr_node->stmts->len - 1];
@@ -237,6 +468,7 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
                 // TODO: cutrrently "int", but should be "void"
                 node->cty = &int_cty;
             }
+            node->no_push = check_push(node);
             blk = blk->superset;
             return node;
         }

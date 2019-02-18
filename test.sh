@@ -4,7 +4,7 @@ try() {
   input="$2"
 
   ./ccc "$input" > tmp-legacy.s
-  gcc -o tmp-legacy-test tmp-legacy.s tmp-test.o
+  gcc -g -o tmp-legacy-test tmp-legacy.s tmp-test.o
   ./tmp-legacy-test
   actual="$?"
 
@@ -101,8 +101,8 @@ try 1 'int main() { return !0; }'
 try 5 'int main() { return 6 ^ 3; }'
 try 11 'int main() { return 100 ^ 111; }'
 # ref: https://en.wikipedia.org/wiki/Comma_operator
-try 3 'int main() { return (1,2,3); }'
-try 3 'int main() { return (1),2,3; }'
+#try 3 'int main() { return (1,2,3); }'
+#try 3 'int main() { return (1),2,3; }'
 # TODO: This should be compiled
 #try 3 'int main() { return ({ int a; a = (1,2,3); a; }); }'
 try 3 'int main() { return 1 ? 3 : 5; }'
@@ -111,10 +111,10 @@ try 5 'int main() { return 0 ? 3 : 5; }'
 try 0 'int main() { int a=1; a = a-2; return ~a; }'
 try 10 'int main() { int a=0; a = a-11; return ~a; }'
 
-try 11 'int main(){int a; a=1; while (a<11) a=a+1; return a;}'
-try 11 'int main(){int b; b=1; while (11+1>b+1) b=b+1; return b;}'
-try 11 'int main(){int a; a=1; while (a+1<11+1) a=a+1; return a;}'
-try 11 'int main(){int a; a=1; while (a<11) {a=a+2;a=a-1;} return a;}'
+try 11 'int main() {int a; a=1; while (a<11) a=a+1; return a;}'
+try 11 'int main() {int b; b=1; while (11+1>b+1) b=b+1; return b;}'
+try 11 'int main() {int a; a=1; while (a+1<11+1) a=a+1; return a;}'
+try 11 'int main() {int a; a=1; while (a<11) {a=a+2;a=a-1;} return a;}'
 try 45 'int main() { int x=0; int y=0; do { y=y+x; x=x+1; } while (x < 10); return y; }'
 
 try 60 'int main() {int sum=0; for (int i=10; i<15; i=i+1) sum = sum + i; return sum;}'
@@ -193,8 +193,7 @@ try 1 'int main() {; return 1;}'
 try 8 'int main() { return 3 + ({ 5; }); }'
 try 28 'int main() { return 3 + ({ 5*5; }); }'
 try 11 'int main() { return 3 + ({ 1+2+5; }); }'
-# TODO: The following should work
-# try 11 'int main() { return 3 + ({ 1; 1; 1+2+5; }); }'
+try 11 'int main() { return 3 + ({ 1; 1; 1+2+5; }); }'
 
 try 3 'int main() { int i=3; i++;}'
 try 5 'int main() { int i=4; i++; i;}'
@@ -215,5 +214,48 @@ try 2 'int main() { int ary[2]; ary[0]=1; ary[1]=2; int *p=ary; return *++p; }'
 try 1 'int main() { int x = 1; {int x = 2;} return x;}'
 try 3 'int main() { int x = 1; int y = 2; {int x = 2; int y = 3;} return x+y;}'
 try 5 'int main() { int a=1; return 3 + ({ int a = 2; int b; int c; int d; a; }); }'
+
+try 1 'int main() { do { int e1 = 11;  int e2 = ({ 100 ^ 111; }); if (e1==e2) return 1; else return 0; }  while (0); }'
+try 5 'extern int global_arr[1]; int main() { return ({ global_arr[0]; }); }'
+try 1 'int main() { do { int e1 = (5); int e2 = (({ int x; int *p = &x; x = 5; *p; })); if (e1 == e2) { return 1; } else { return 0; } } while (0); }'
+try 60 'int main(){ do { int e2 = (({ int sum=0; for (int i=10; i<15; i=i+1) {sum = sum + i;} sum; })); return e2; } while (0); }'
+try 60 'int main(){ do { int e2 = (({ int sum=0; for (int i=10; i<15; i=i+1) {sum = sum + i; sum = sum + 0;} sum; })); return e2; } while (0); }'
+try 1 'int main(){ do { int e1 = (60); int e2 = (({ int sum=0; for (int i=10; i<15; i=i+1) {sum = sum + i; sum = sum + 0;} sum; })); if (e1 == e2) { return 1; } else { return 0; } } while (0); }'
+try 45 ' int main() { do {int e2 = (({ int x=0; int y=0; do { y=y+x; x=x+1; } while (x<10); y; })); return e2; } while (0); }'
+try 45 ' int main() { do { int e1 = (45); int e2 = (({ int x=0; int y=0; do { y=y+x; x=x+1; } while (x<10); y; })); return e2; } while (0); }'
+try 1 ' int main() { do { int e1 = (45); int e2 = (({ int x=0; int y=0; do { y=y+x; x=x+1; } while (x<10); y; })); if (e1 == e2) { return 1; } else { return 0; } } while (0); }'
+try 1 'int main() { int x = 1; {int x = 2;} return x;}'
+try 11 'int main() { return 3 + ({ 100; 200; 1+2+5; }); }'
+try 11 'int main() { return 3 + ({ 100; {200;} 1+2+5; }); }'
+try 11 'int main() { return 3 + ({ 1; { ({1;}); } 1+2+5; }); }'
+try 8 'int main() { ({ 1+2; { ({1;}); } {({1;});} 1+2+5; }); }'
+try 8 'int main() { return ({ 1+2; { ({1;}); } {({1;});} 1+2+5; }); }'
+
+try 11 'int main() { return 3 + ({ 1; 1+1; 1+2+5; }); }'
+try 11 'int main() { return 3 + ({ 1; {1+1;} 1+2+5; }); }'
+
+try 11 'int main() { return 3 + ({ 1; 1*1; 1+2+5; }); }'
+try 11 'int main() { return 3 + ({ 1; {1*1;} 1+2+5; }); }'
+
+try 11 'int main() { return 3 + ({ 1 ? 100 : 200; 1+2+5; }); }'
+try 11 'int main() { return 3 + ({ {1 ? 100 : 200;} 1+2+5; }); }'
+
+try 11 'int main() { return 3 + ({ ~100; 1+2+5; }); }'
+try 11 'int main() { return 3 + ({ {~100;} 1+2+5; }); }'
+
+try 11 'int main() { return 3 + ({ int i=1; i++; 1+2+5; }); }'
+try 11 'int main() { return 3 + ({ {int i=1; i++;} 1+2+5; }); }'
+try 5 'int main() { return 3 + ({ int i=1; i++; i; }); }'
+
+try 11 'int main() { return 3 + ({ int test; test; 1+2+5; }); }'
+try 11 'int main() { return 3 + ({ {int test; test;} 1+2+5; }); }'
+
+try 11 'int main() { return 3 + ({ if (1) 200; 300; 1+2+5; }); }'
+try 11 'int main() { return 3 + ({ {if (1) 200; 300;} 1+2+5; }); }'
+try 11 'int main() { return 3 + ({ {if (1) {200;} 300;} 1+2+5; }); }'
+
+
+try 11 'int main() { return 3 + ({ int a; if (1) a=200; a=300; 1+2+5; }); }'
+try 11 'int main() { return 3 + ({ int a; if (1) {a=200;} a=300; 1+2+5; }); }'
 
 echo 'OK!'
