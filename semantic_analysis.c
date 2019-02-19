@@ -53,137 +53,33 @@ static bool check_push(Node *node) {
         error("check_push(): pointer to upper node is NULL.");
 
     switch (node->ty) {
-        case ND_NUM:
-        case ND_SIZEOF:
-        case ND_ALIGNOF:
-            switch (node->upper->ty) {
-                case ND_EXPR_STMT:
-                    return check_push(node->upper);
-                case ND_FUNC_CALL:
-                case ND_VAR_DEF:
-                case ND_DO_WHILE:
-                case ND_IF:
-                case ND_RETURN:
-                case '!':
-                case '%':
-                case '*':
-                case '+':
-                case '-':
-                case '/':
-                case '<':
-                case '=':
-                case '>':
-                case '?':
-                case '^':
-                case '|':
-                case '~':
-                case ND_EQ:
-                case ND_NE:
-                case ND_LE:
-                case ND_GE:
-                case ND_LOR:
-                case ND_LAND:
-                case ND_SHL:
-                case ND_SHR:
-                    return false;
-            }
-            error("check_push() <- ND_NUM: Unknown upper %d, node->val = %d", node->upper->ty, node->val);
-        case ND_LVAR:
-        case ND_GVAR:
-            switch (node->upper->ty) {
-                case ND_EXPR_STMT:
-                    return check_push(node->upper);
-                case ND_FUNC_CALL:
-                case ND_DEREF:
-                case ND_ADDR:
-                case ND_RETURN:
-                case ND_SIZEOF:
-                case ND_ALIGNOF:
-                case '!':
-                case '%':
-                case '*':
-                case '+':
-                case '-':
-                case '/':
-                case '<':
-                case '=':
-                case '>':
-                case '?':
-                case '^':
-                case '|':
-                case '~':
-                case ND_EQ:
-                case ND_PRE_INC:
-                case ND_PRE_DEC:
-                case ND_POST_INC:
-                case ND_POST_DEC:
-                    return false;
-            }
-            error("check_push() <- ND_LVAR/ND_GVAR : Unknown upper %d", node->upper->ty);
-        case ND_EXPR_STMT:
-            switch (node->upper->ty) {
-                case ND_IF:
-                case ND_WHILE:
-                case ND_DO_WHILE:
-                case ND_FOR:  
-                    return false;
-                case ND_CMPD_STMT:
-                    return check_push(node->upper);
-                case ND_STMT_EXPR:
-                    if (node->is_last) return false;
-                    return true;
-            }
-            error("check_push() <- ND_EXPR_STMT: Unknown upper %d", node->upper->ty);
-        case ND_CMPD_STMT:
-            switch (node->upper->ty) {
-                case ND_FUNC_DEF:
-                case ND_IF:
-                case ND_WHILE:
-                case ND_DO_WHILE:
-                case ND_FOR:
-                    return false;
-                case ND_CMPD_STMT:
-                    return check_push(node->upper);
-                case ND_STMT_EXPR:
-                    if (node->is_last) return false;
-                    return true;
-            }
-            error("check_push() <- ND_CMPD_STMT: Unknown upper %d", node->upper->ty);
-        case ND_STMT_EXPR:
-            switch (node->upper->ty) {
-                case ND_EXPR_STMT:
-                    return check_push(node->upper);
-                case ND_VAR_DEF:
-                case '+':
-                case ND_RETURN:
-                    return false;
-            }
-            error("check_push() <- ND_STMT_EXPR: Unknown upper %d", node->upper->ty);
         case ND_VAR_DEF:
-            switch (node->upper->ty) {
-                case ND_FUNC_DEF:
-                    return true;
-                case ND_FOR:
-                    return false;
-                case ND_CMPD_STMT:
-                    return check_push(node->upper);
-                case ND_STMT_EXPR:
-                    if (node->is_last) return false;
-                    return true;
-            }
-            error("check_push() <- ND_VAR_DEF: Unknown upper %d", node->upper->ty);
+        case ND_EXPR_STMT:
+        case ND_CMPD_STMT:
         case ND_IF:
         case ND_WHILE:
         case ND_DO_WHILE:
         case ND_FOR:
             switch (node->upper->ty) {
+                case ND_FUNC_DEF:
+                case ND_IF:
+                case ND_WHILE:
+                case ND_DO_WHILE:
+                case ND_FOR:
+                    return false;
                 case ND_CMPD_STMT:
                     return check_push(node->upper);
                 case ND_STMT_EXPR:
                     if (node->is_last) return false;
                     return true;
             }
-            error("check_push() <- ND_IF: Unknown upper %d", node->upper->ty);
+            error("check_push() Type %d : Unknown upper node type %d", node->ty, node->upper->ty);
+        case ND_STMT_EXPR:
+        case ND_NUM:
+        case ND_SIZEOF:
+        case ND_ALIGNOF:
+        case ND_LVAR:
+        case ND_GVAR:
         case ND_FUNC_CALL:
         case ND_DEREF:
         case '!':   
@@ -222,7 +118,11 @@ static bool check_push(Node *node) {
                 case ND_DO_WHILE:
                 case ND_FOR:
                 case ND_DEREF:
+                case ND_ADDR:
                 case ND_RETURN:
+                case ND_SIZEOF:
+                case ND_ALIGNOF:
+                case '!':
                 case '%':
                 case '*':
                 case '+':
@@ -232,6 +132,8 @@ static bool check_push(Node *node) {
                 case '=':
                 case '>':
                 case '?':
+                case '^':
+                case '|':
                 case '~':
                 case ND_EQ:
                 case ND_NE:
@@ -241,15 +143,19 @@ static bool check_push(Node *node) {
                 case ND_LAND:
                 case ND_SHL:
                 case ND_SHR:
+                case ND_PRE_INC:
+                case ND_PRE_DEC:
+                case ND_POST_INC:
+                case ND_POST_DEC:
                     return false;
             }
-            error("check_push() <- Operation: Node->ty = %d. Unknown upper %d", node->ty, node->upper->ty);
+            error("check_push() Type %d : Unknown upper node type %d", node->ty, node->upper->ty);
         case ND_RETURN:
             switch (node->upper->ty) {
                 case ND_CMPD_STMT:
                     return check_push(node->upper);
             }            
-            error("check_push() <- ND_RETURN: Unknown upper %d", node->upper->ty);
+            error("check_push() ND_RETURN: Unknown upper %d", node->upper->ty);
         default:
             error("check_push() : Unknown node type coming: %d", node->ty);
             exit(0);
