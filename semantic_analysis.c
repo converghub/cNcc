@@ -86,6 +86,7 @@ static bool check_push(Node *node) {
         case '%':
         case '*':
         case '+':
+        case ',':
         case '-':
         case '/':
         case '<':
@@ -111,6 +112,9 @@ static bool check_push(Node *node) {
             switch (node->upper->ty) {
                 case ND_EXPR_STMT:
                     return check_push(node->upper);
+                case ',':
+                    if (node->is_last) return false;
+                    return true;
                 case ND_FUNC_CALL:
                 case ND_VAR_DEF:
                 case ND_IF:

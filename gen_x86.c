@@ -81,12 +81,10 @@ void gen(Node *node) {
     if (node->ty == ND_STMT_EXPR) {
         // expr_node->ty is ND_CMPD_STMT
         Node *expr_node = node->stmt_expr;
-        for (int i = 0; i < expr_node->stmts->len; i++) {
+        for (int i = 0; i < expr_node->stmts->len; i++) 
             gen(expr_node->stmts->data[i]);
-            if (node->no_push) {
-                printf("    pop rax\n");
-            }
-        }
+        if (node->no_push) 
+            printf("    pop rax\n");
         return;
     }
 
@@ -457,7 +455,9 @@ void gen(Node *node) {
     gen(node->lhs);
     gen(node->rhs);
 
-    if (node->ty == ',') return;
+    if (node->ty == ',') {
+        return;
+    }
 
     printf("    pop rdi\n");
     printf("    pop rax\n");

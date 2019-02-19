@@ -143,11 +143,14 @@ int main() {
     EXPECT(8, ({ 1; {1+1;} 1+2+5; }) );
     EXPECT(8, ({ 1+2; { ({1;}); } {({1;});} 1+2+5; }) );
 
-    // TODO: The followings should be compiled correctly
-    /*
-    EXPECT(3, (1, 2, 3));
-    */
-
+    EXPECT(3, (1, 2, 3) );
+    EXPECT(3, ((1), 2, 3) );
+    EXPECT(3, (1, (2), 3) );
+    EXPECT(3, (1, (2), (3)) );
+    EXPECT(3, ( ({int a=1;a;}), 2, 3) );
+    EXPECT(4, ( ({int a=1;a;}), ({int a=1; {{ {1;} }}  a;}), 4 ) );
+    EXPECT(3, ({ int a; a = (1,2,3); a; })  );
+    EXPECT(4, ( ({ int a; a = (1,2,3); a; }), ({ int a; a = (1,2,3); a; }), ({ int a; a = (1,2,4); a; }) )  );
 
     printf("OK.\n");
     return 0;

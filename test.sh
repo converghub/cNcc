@@ -100,11 +100,6 @@ try 0 'int main() { return !1; }'
 try 1 'int main() { return !0; }'
 try 5 'int main() { return 6 ^ 3; }'
 try 11 'int main() { return 100 ^ 111; }'
-# ref: https://en.wikipedia.org/wiki/Comma_operator
-#try 3 'int main() { return (1,2,3); }'
-#try 3 'int main() { return (1),2,3; }'
-# TODO: This should be compiled
-#try 3 'int main() { return ({ int a; a = (1,2,3); a; }); }'
 try 3 'int main() { return 1 ? 3 : 5; }'
 try 5 'int main() { return 0 ? 3 : 5; }'
 
@@ -187,8 +182,8 @@ try 98 'int main() { char *p = "abc"; char *q = "def"; return p[1]; }'
 try 99 'int main() { char *p = "abc"; char *q = "def"; return p[2]; }'
 
 try 5 'extern int global_arr[1]; int main() { return global_arr[0]; }'
-
 try 1 'int main() {; return 1;}'
+
 # https://gcc.gnu.org/onlinedocs/gcc/Statement-Exprs.html
 try 8 'int main() { return 3 + ({ 5; }); }'
 try 28 'int main() { return 3 + ({ 5*5; }); }'
@@ -257,5 +252,17 @@ try 11 'int main() { return 3 + ({ {if (1) {200;} 300;} 1+2+5; }); }'
 
 try 11 'int main() { return 3 + ({ int a; if (1) a=200; a=300; 1+2+5; }); }'
 try 11 'int main() { return 3 + ({ int a; if (1) {a=200;} a=300; 1+2+5; }); }'
+
+# ref: https://en.wikipedia.org/wiki/Comma_operator
+try 3 'int main() { return 1, 2, 3; }'
+try 3 'int main() { return (1), 2, 3; }'
+try 3 'int main() { return 1, (2), 3; }'
+try 3 'int main() { return 1, 2, (3); }'
+try 3 'int main() { return (1, 2, 3); }'
+try 3 'int main() { return ( ({int a=1;a;}), 2, 3); }'
+try 4 'int main() { return ( ({int a=1;a;}), ({int a=1; {{ {1;} }}  a;}), 4 ); }'
+try 3 'int main() { return ({ int a; a = (1,2,3); a; }); }'
+try 4 'int main() { return ({ int a; a = (1,2,3); a; }), ({ int a; a = (1,2,3); a; }), ({ int a; a = (1,2,4); a; }); }'
+
 
 echo 'OK!'

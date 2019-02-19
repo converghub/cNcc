@@ -92,9 +92,7 @@ static Node *term() {
 
 
         Node *node = comma();
-        if (!consume(')'))
-            error("term(): 開きカッコに対応する閉じカッコがありません: %s",
-                GET_TK(tokens, pos)->input);
+        expect(')');
         return node;
     }
 
@@ -380,10 +378,16 @@ static Node *assign() {
 
 static Node *comma() {
     Node *node = assign();
-    if (consume(','))
-        return new_node(',', node, comma());
-    else
-        return node;
+
+    for (;;) {
+        if (consume(',')) {
+            node->is_last =false;
+            node = new_node(',', node, comma());
+        } else {
+            node->is_last = true;
+            return node;
+        }
+    }
 }
 
 
