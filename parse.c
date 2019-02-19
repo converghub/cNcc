@@ -1,4 +1,4 @@
-#include "ccc.h"
+#include "cncc.h"
 
 #define GET_TK(TK, POS) ((Token *)(TK)->data[(POS)])
 

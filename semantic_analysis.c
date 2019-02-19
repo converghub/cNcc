@@ -1,4 +1,4 @@
-#include "ccc.h"
+#include "cncc.h"
 
 extern Vector *strings;
 

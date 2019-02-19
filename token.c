@@ -1,4 +1,4 @@
-#include "ccc.h"
+#include "cncc.h"
 #define SYMBOL_NUMBER (sizeof symbols)/(sizeof (struct symbol))
 
 
