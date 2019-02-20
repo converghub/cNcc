@@ -42,6 +42,7 @@ long **alloc_ptr_ptr(long x) {
 }
 EOF
 
+try 3 "int main() { 3; }"
 try 21 'int main() { 5+20-4; }'
 try 41 'int main() { 12 + 34 - 5; }'
 try 47 'int main() { 5+6*7; }'
@@ -180,6 +181,9 @@ try 0 'int main() { char *p = "abc"; return p[3]; }'
 try 97 'int main() { char *p = "abc"; char *q = "def"; return p[0]; }'
 try 98 'int main() { char *p = "abc"; char *q = "def"; return p[1]; }'
 try 99 'int main() { char *p = "abc"; char *q = "def"; return p[2]; }'
+try 97 "char main() { 'a'; }"
+try 98 "char main() { 'b'; }"
+try 99 "char main() { 'c'; }"
 
 try 5 'extern int global_arr[1]; int main() { return global_arr[0]; }'
 try 1 'int main() {; return 1;}'
@@ -216,9 +220,9 @@ try 1 'int main() { do { int e1 = (5); int e2 = (({ int x; int *p = &x; x = 5; *
 try 60 'int main(){ do { int e2 = (({ int sum=0; for (int i=10; i<15; i=i+1) {sum = sum + i;} sum; })); return e2; } while (0); }'
 try 60 'int main(){ do { int e2 = (({ int sum=0; for (int i=10; i<15; i=i+1) {sum = sum + i; sum = sum + 0;} sum; })); return e2; } while (0); }'
 try 1 'int main(){ do { int e1 = (60); int e2 = (({ int sum=0; for (int i=10; i<15; i=i+1) {sum = sum + i; sum = sum + 0;} sum; })); if (e1 == e2) { return 1; } else { return 0; } } while (0); }'
-try 45 ' int main() { do {int e2 = (({ int x=0; int y=0; do { y=y+x; x=x+1; } while (x<10); y; })); return e2; } while (0); }'
-try 45 ' int main() { do { int e1 = (45); int e2 = (({ int x=0; int y=0; do { y=y+x; x=x+1; } while (x<10); y; })); return e2; } while (0); }'
-try 1 ' int main() { do { int e1 = (45); int e2 = (({ int x=0; int y=0; do { y=y+x; x=x+1; } while (x<10); y; })); if (e1 == e2) { return 1; } else { return 0; } } while (0); }'
+try 45 'int main() { do {int e2 = (({ int x=0; int y=0; do { y=y+x; x=x+1; } while (x<10); y; })); return e2; } while (0); }'
+try 45 'int main() { do { int e1 = (45); int e2 = (({ int x=0; int y=0; do { y=y+x; x=x+1; } while (x<10); y; })); return e2; } while (0); }'
+try 1 'int main() { do { int e1 = (45); int e2 = (({ int x=0; int y=0; do { y=y+x; x=x+1; } while (x<10); y; })); if (e1 == e2) { return 1; } else { return 0; } } while (0); }'
 try 1 'int main() { int x = 1; {int x = 2;} return x;}'
 try 11 'int main() { return 3 + ({ 100; 200; 1+2+5; }); }'
 try 11 'int main() { return 3 + ({ 100; {200;} 1+2+5; }); }'

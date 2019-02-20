@@ -122,6 +122,9 @@ int main() {
     EXPECT(97, ({ char *p = "abc"; p[0]; }));
     EXPECT(98, ({ char *p = "abc"; p[1]; }));
     EXPECT(99, ({ char *p = "abc"; p[2]; }));
+    EXPECT('a', ({ char *p = "abc"; p[0]; }));
+    EXPECT('b', ({ char *p = "abc"; p[1]; }));
+    EXPECT('c', ({ char *p = "abc"; p[2]; }));
     EXPECT(0, ({ char *p = "abc"; p[3]; }) );
 
     EXPECT(5, ({ global_arr[0]; }) );

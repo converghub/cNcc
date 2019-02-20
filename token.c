@@ -22,6 +22,39 @@ static struct symbol{
 };
 
 
+static char escape_sequences[256] = {
+    ['a'] = '\a', ['b'] = '\b',  ['t'] = '\t',
+    ['n'] = '\n', ['v'] = '\v',  ['f'] = '\f',
+    ['r'] = '\r', ['e'] = 0x1B,  ['E'] = 0x1B,
+};
+
+
+static int read_char(int *char_val, char *p) {
+    char *first = p;
+    if (!*p)
+        error("Unexpected end of input.");
+    
+    if (*p != '\\') {
+        *char_val = *p++;
+    } else {
+        // read escape sequences
+        p++;
+        if (!*p)
+            error("Unexpected end of input.");        
+        int esc = escape_sequences[(unsigned)*p];
+        *char_val = esc ? esc : *p;
+        p++;
+    }
+
+    if (*p != '\'')
+        error("Unclosed character literal.");
+
+    p++;
+    // return size of char literal
+    return p - first;
+}
+
+
 static Map *new_keywords() {
     Map *map = new_map();
     map_puti(map, "if", TK_IF);
@@ -52,6 +85,13 @@ loop:
             continue;
         }
 
+        // Char literal
+        if (*p == '\'') {
+            Token *t = add_token(v, TK_NUM, p);
+            p++;
+            p += read_char(&t->val, p);
+            continue;
+        }
 
         // String literal
         if (*p == '"') {
