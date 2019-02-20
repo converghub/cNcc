@@ -137,6 +137,12 @@ int align_of(Type *cty) {
         return 0;
 }
 
+int roundup(int num, int multiple) {
+    // multiple should be 2^n
+    assert( multiple && ( (multiple & (multiple-1)) == 0 ) );
+    return (num + multiple - 1) & -multiple;
+}
+
 Node *addr_of(Node *base, Type *cty) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_ADDR;
@@ -147,7 +153,6 @@ Node *addr_of(Node *base, Type *cty) {
 
 
 /* test functions */ 
-
 static void vec_test () {
     Vector *vec = new_vector();
     expect(__LINE__, 0, vec->len);

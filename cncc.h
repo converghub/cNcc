@@ -206,6 +206,7 @@ int align_of(Type *cty);
 Type *ary_of(Type *base, int len);
 Type *ctype_of_ary(Type *cty);
 Node *addr_of(Node *base, Type *cty);
+int roundup(int num, int multiple);
 
 // logger.c
 void dump_tokens(Vector *tks);

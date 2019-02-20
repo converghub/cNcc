@@ -200,6 +200,7 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
         }
         case ND_VAR_DEF: {
             // Local variable definition
+            stacksize = roundup(stacksize, align_of(node->cty));
             stacksize += size_of(node->cty);
             node->offset = stacksize;
 

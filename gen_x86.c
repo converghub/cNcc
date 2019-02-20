@@ -34,8 +34,8 @@ void gen(Node *node) {
         printf("    push rbp\n");
         printf("    mov rbp, rsp\n");
 
-        // 関数内の変数領域確保
-        printf("    sub rsp, %d\n", node->stacksize);
+        // Set stack data size
+        printf("    sub rsp, %d\n", roundup(node->stacksize, 16));
 
         // Arity
         for (int j = 0; j < node->args->len; j++) {
@@ -274,11 +274,8 @@ void gen(Node *node) {
             printf("    pop %s\n", args_reg64[i]);
         }
 
-        printf("    mov rbx, rsp\n");
-        printf("    and rsp, ~0x0f\n");
         printf("    mov rax, 0\n");
         printf("    call %s\n", node->name);
-        printf("    mov rsp, rbx\n");
         printf("    push rax\n");
         return;
     }
