@@ -5,15 +5,23 @@
 static Vector *tokens;
 static int pos;
 static int globals_counter;
-static Type int_cty = {INT, NULL};
-static Type char_cty = {CHAR, NULL};
+static Type int_cty = {INT, 4, 4, NULL};
+static Type char_cty = {CHAR, 1, 1, NULL};
 static Node null_stmt = {ND_NULL};
 
 // for sema.c, codegen.c
 Vector *strings;
 
+static Node *assign();
+static Node *mul();
+static Node *decl();
+static Node *comma();
+static Node *stmt();
+static Node *cmpd_stmt();
+
+
 static void expect(int ty) {
-    Token *t = tokens->data[pos];
+    Token *t = GET_TK(tokens, pos);
     if (t->ty != ty)
         error("%c (%d) expected, but got %c (%d). input: %s.", ty, ty, t->ty, t->ty, t->input);    
     pos++;
@@ -26,22 +34,56 @@ static int consume(int ty) {
     return 1;
 }
 
-static Type *get_ctype() {
-    Token *t = GET_TK(tokens, pos);
-    if (t->ty == TK_INT)
-        return &int_cty;
-    if (t->ty == TK_CHAR)
-        return &char_cty;
-    return NULL;
+static bool is_ctype() {
+    int ty = GET_TK(tokens, pos)->ty;
+    return ty == TK_INT || ty == TK_CHAR || ty == TK_STRUCT;
 }
 
-static Type *ctype() {
-    Type *cty = get_ctype();
-    if (!cty)
-        error("ctype(): Typename expected, but got %s. tokens pos = %d.\n",
+static Type *set_ctype() {
+    if (!is_ctype())
+        error("set_ctype(): Typename expected, but got %s. tokens pos = %d.\n",
             GET_TK(tokens, pos)->input, pos);
     
-    pos++;
+    Type *cty = calloc(1, sizeof(Type));
+    switch (GET_TK(tokens, pos)->ty) {
+        case TK_INT:
+            *cty = int_cty;
+            pos++;
+            break;
+        case TK_CHAR:
+            *cty = char_cty;
+            pos++;
+            break;
+        case TK_STRUCT:
+            pos++;
+            cty->ty = STRUCT;
+            expect('{');
+
+            Vector *members = new_vector();
+            while (GET_TK(tokens, pos)->ty != '}') {
+                vec_push(members, decl());
+                expect(';');
+            }
+            expect('}');
+
+            int offset = 0;
+            for (int i = 0; i < members->len; i++) {
+                Node *mbr_node = members->data[i];
+                if (mbr_node->ty != ND_VAR_DEF)
+                    error("set_ctype(): Struct-members node type must be ND_VARDEF.");
+
+                offset = roundup(offset, mbr_node->cty->align);
+                mbr_node->cty->offset = offset;
+                offset += mbr_node->cty->size;
+                if (cty->align < mbr_node->cty->align)
+                    cty->align = mbr_node->cty->align;
+            }
+
+            cty->size = roundup(offset, cty->align);
+            cty->mbrs = members;
+            break;
+    }
+
     while (consume('*'))
         cty = ptr_to(cty);
     return cty;
@@ -70,13 +112,6 @@ static Node *new_node_ident(char *name) {
     node->name = name;
     return node;    
 }
-
-
-static Node *assign();
-static Node *mul();
-static Node *comma();
-static Node *stmt();
-static Node *cmpd_stmt();
 
 
 static Node *term() {
@@ -143,6 +178,18 @@ static Node *postfix() {
     Node *lhs = term();
 
     for (;;) {
+        if (consume('.')) {
+            Node *node = malloc(sizeof(Node));
+            node->ty = ND_DOT;
+            node->expr = lhs;
+            if (GET_TK(tokens, pos)->ty != TK_IDENT)
+                error("variable name expected, but got %s", GET_TK(tokens, pos)->input);
+            node->mbr_name = GET_TK(tokens, pos)->name;
+            pos++;
+            lhs = node;
+            continue;
+        }
+
         if (consume(TK_INC)) {
             Node *node = malloc(sizeof(Node));
             node->ty = ND_POST_INC;
@@ -414,7 +461,11 @@ static Node* decl() {
     node->ty = ND_VAR_DEF;
 
     // Set C type name
-    node->cty = ctype();
+    node->cty = set_ctype();
+//    if (node->cty->mbrs) {
+//        fprintf(stderr, "%s %d\n", ((Node*)node->cty->mbrs->data[0])->name, &node->cty->mbrs->data[0]);
+//        fprintf(stderr, "%s %d\n", ((Node*)node->cty->mbrs->data[1])->name, &node->cty->mbrs->data[1]);
+//    }
 
     // Store identifer
     if (GET_TK(tokens, pos)->ty != TK_IDENT)
@@ -463,7 +514,8 @@ static Node *stmt() {
             node->els_stmt = NULL;
         return node;
 
-    } else if (GET_TK(tokens, pos)->ty == TK_INT || GET_TK(tokens, pos)->ty == TK_CHAR) {
+    } else if (GET_TK(tokens, pos)->ty == TK_INT || GET_TK(tokens, pos)->ty == TK_CHAR
+                || GET_TK(tokens, pos)->ty == TK_STRUCT) {
         node = decl();
         expect(';');
         return node;
@@ -554,9 +606,7 @@ static Node *top() {
     strings = new_vector();
     Node *node = malloc(sizeof(Node));
 
-    Type *cty = ctype();
-    if (!cty)
-        error("type name expected, but got %s", GET_TK(tokens, pos)->input);
+    Type *cty = set_ctype();
 
     if (GET_TK(tokens, pos)->ty != TK_IDENT)
         error("top() : Name expected, but got %s\n", GET_TK(tokens, pos)->input);
@@ -570,7 +620,7 @@ static Node *top() {
 
         int argc = 0;
         while (GET_TK(tokens, pos)->ty != (')')) {
-            Type *arg_cty = ctype();
+            Type *arg_cty = set_ctype();
             if (arg_cty)
                 vec_push(node->args, term());
             else
@@ -607,8 +657,8 @@ static Node *top() {
     if (is_extern) {
         node->is_extern = true;
     } else {
-        node->data = calloc(1, size_of(node->cty));
-        node->len = size_of(node->cty);
+        node->data = calloc(1, node->cty->size);
+        node->len = node->cty->size;
         node->is_extern = false;
     }
     node->strings = NULL;

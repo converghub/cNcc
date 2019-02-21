@@ -25,6 +25,7 @@ void dump_tokens(Vector *tks) {
     fprintf(fplog, "ND_FOR : %d\n", ND_FOR);
     fprintf(fplog, "ND_DEREF : %d\n", ND_DEREF);
     fprintf(fplog, "ND_ADDR : %d\n", ND_ADDR);
+    fprintf(fplog, "ND_DOT : %d\n", ND_DOT);
     fprintf(fplog, "ND_EXPR_STMT : %d\n", ND_EXPR_STMT);
     fprintf(fplog, "ND_STMT_EXPR : %d\n", ND_STMT_EXPR);
     fprintf(fplog, "ND_CMPD_STMT : %d\n", ND_CMPD_STMT);

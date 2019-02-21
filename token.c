@@ -64,6 +64,7 @@ static Map *new_keywords() {
     map_puti(map, "for", TK_FOR);
     map_puti(map, "int", TK_INT);
     map_puti(map, "char", TK_CHAR);
+    map_puti(map, "struct", TK_STRUCT);
     map_puti(map, "sizeof", TK_SIZEOF);
     map_puti(map, "extern", TK_EXTERN);
     map_puti(map, "do", TK_DO);
@@ -129,7 +130,7 @@ loop:
         }
 
         // Single-letter symbol
-        if (strchr("+-*/=;(),{}><&[]|!^?:~%", *p)) {
+        if (strchr("+-*/=;(),{}><&[]|!^?:~%.", *p)) {
             add_token(v, *p, p);
             p++;
             continue;

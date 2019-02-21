@@ -14,6 +14,14 @@ static void gen_lval(Node *node) {
         return gen(node->expr);
     }
 
+    if (node->ty == ND_DOT) {
+        gen_lval(node->expr);
+        printf("    pop rax\n");
+        printf("    add rax, %d\n", node->offset);
+        printf("    push rax\n");
+        return;
+    }
+
     if (node->ty == ND_LVAR || node->ty == ND_VAR_DEF) {
         printf("    mov rax, rbp\n");
         printf("    sub rax, %d\n", node->offset);
@@ -41,7 +49,7 @@ void gen(Node *node) {
         for (int j = 0; j < node->args->len; j++) {
             gen_lval(node->args->data[j]);
             printf("    pop rax\n");
-            int data_size = size_of(((Node *)node->args->data[j])->cty);
+            int data_size = ((Node *)node->args->data[j])->cty->size;
             if (data_size == 4)
                 printf("    mov [rax], %s\n", args_reg32[j]);
             else if (data_size == 1)
@@ -231,10 +239,10 @@ void gen(Node *node) {
         gen_lval(node);
 
         printf("    pop rax\n");
-        if (size_of(node->cty) == 4) {
+        if (node->cty->size == 4) {
             printf("    mov eax, [rax]\n");            
         }
-        else if (size_of(node->cty) == 1) {
+        else if (node->cty->size == 1) {
             printf("    mov al, [rax]\n");
             printf("    and rax, 0xFF\n");
         } else
@@ -253,9 +261,9 @@ void gen(Node *node) {
         printf("    pop rdi\n");
         printf("    pop rax\n");
 
-        if(size_of(node->cty) == 4) 
+        if(node->cty->size == 4) 
             printf("    mov [rax], edi\n");
-        else if (size_of(node->cty) == 1)
+        else if (node->cty->size == 1)
             printf("    mov [rax], dil\n");
         else
             printf("    mov [rax], rdi\n");
@@ -289,14 +297,15 @@ void gen(Node *node) {
         printf("    pop rax\n");
 
 
-        if(size_of(node->lhs->cty) == 4) 
+        if(node->lhs->cty->size == 4) 
             printf("    mov [rax], edi\n");
-        else if (size_of(node->lhs->cty) == 1)
+        else if (node->lhs->cty->size == 1)
             printf("    mov [rax], dil\n");
         else
             printf("    mov [rax], rdi\n");
 
         // for example, if "a=b=c...", "func(a=1)"
+        printf("    mov rax, [rax]\n");
         if (!node->no_push)
             printf("    push rdi\n");
         return;
@@ -305,14 +314,17 @@ void gen(Node *node) {
     if (node->ty == ND_DEREF) {
         gen(node->expr);
         printf("    pop rax\n");
-        if (align_of(node->expr->cty->ptrto) == 4) {
+
+        if (node->expr->cty->ptrto->align == 4) {
             printf("    mov eax, [rax]\n");  
-        } else if (align_of(node->expr->cty->ptrto) == 1) {
+        } else if (node->expr->cty->ptrto->align == 1) {
             printf("    mov al, [rax]\n");
             printf("    and rax, 0xFF\n");            
         } else 
             printf("    mov rax, [rax]\n");
-        printf("    push rax\n");
+
+        if (!node->no_push)
+            printf("    push rax\n");
         return;
     }
 
@@ -321,21 +333,39 @@ void gen(Node *node) {
         return;
     }
 
+    if (node->ty == ND_DOT) {
+        gen_lval(node->expr);
+        printf("    pop rax\n");
+
+        printf("    add rax, %d\n", node->offset);
+        if (node->expr->cty->align == 4) {
+            printf("    mov eax, [rax]\n");  
+        } else if (node->expr->cty->align == 1) {
+            printf("    mov al, [rax]\n");
+            printf("    and rax, 0xFF\n");            
+        } else 
+            printf("    mov rax, [rax]\n");
+
+        if (!node->no_push)
+            printf("    push rax\n");
+        return;
+    }
+
     if (node->ty == ND_PRE_INC || node->ty == ND_PRE_DEC) {
         gen(node->expr);
         printf("    pop rax\n");
         gen_lval(node->expr);
-        if (size_of(node->cty) == 4) {
+        if (node->cty->size == 4) {
             printf("    mov eax, [rax]\n");  
         }
-        else if (size_of(node->cty) == 1) {
+        else if (node->cty->size == 1) {
             printf("    mov al, [rax]\n");
             printf("    and rax, 0xFF\n");
         } else
             printf("    mov rax, [rax]\n");
         int num = 1;
         if (node->expr->cty->ty == PTR)
-            num = align_of(node->expr->cty->ptrto);
+            num = node->expr->cty->ptrto->align;
         if (node->ty == ND_PRE_INC)
             printf("    add rax, %d\n", num);
         else if (node->ty == ND_PRE_DEC)
@@ -352,17 +382,17 @@ void gen(Node *node) {
         gen(node->expr);
         printf("    pop r11\n");
         gen_lval(node->expr);
-        if (size_of(node->cty) == 4) {
+        if (node->cty->size == 4) {
             printf("    mov eax, [rax]\n");  
         }
-        else if (size_of(node->cty) == 1) {
+        else if (node->cty->size == 1) {
             printf("    mov al, [rax]\n");
             printf("    and rax, 0xFF\n");
         } else
             printf("    mov rax, [rax]\n");
         int num = 1;
         if (node->expr->cty->ty == PTR)
-            num = align_of(node->expr->cty->ptrto);
+            num = node->expr->cty->ptrto->align;
         if (node->ty == ND_POST_INC)
             printf("    add rax, %d\n", num);
         else if (node->ty == ND_POST_DEC)
@@ -379,11 +409,11 @@ void gen(Node *node) {
     if (node->ty == '!') {
         gen(node->expr);
         printf("    pop rax\n");
-        if (align_of(node->expr->cty) == 4) {
+        if (node->expr->cty->align == 4) {
             printf("    mov rcx, 0xFFFFFFFF\n");
             printf("    and rax, rcx\n");            
         }
-        else if (align_of(node->expr->cty) == 1) {
+        else if (node->expr->cty->align == 1) {
             printf("    and rax, 0xFF\n");
         } 
         printf("    mov rdi, 0\n");
@@ -466,9 +496,9 @@ void gen(Node *node) {
                 printf("    push rdi\n");
                 int coeff = 0;
                 if (node->rhs->cty->ty == ARY) 
-                    coeff = align_of(node->rhs->cty);
+                    coeff = node->rhs->cty->align;
                 else
-                    coeff = align_of(node->rhs->cty->ptrto);
+                    coeff = node->rhs->cty->ptrto->align;
                 printf("    mov rdi, %d\n", coeff);
                 printf("    mul rdi\n");
                 printf("    pop rdi\n");                
@@ -477,9 +507,9 @@ void gen(Node *node) {
                 printf("    mov rax, rdi\n");
                 int coeff = 0;
                 if (node->lhs->cty->ty == ARY) 
-                    coeff = align_of(node->lhs->cty);
+                    coeff = node->lhs->cty->align;
                 else
-                    coeff = align_of(node->lhs->cty->ptrto);                
+                    coeff = node->lhs->cty->ptrto->align;                
                 printf("    mov rdi, %d\n", coeff);
                 printf("    mul rdi\n");
                 printf("    mov rdi, rax\n");
@@ -495,9 +525,9 @@ void gen(Node *node) {
                 printf("    mov rax, rdi\n");
                 int coeff = 0;
                 if (node->lhs->cty->ty == ARY) 
-                    coeff = align_of(node->lhs->cty);
+                    coeff = node->lhs->cty->align;
                 else
-                    coeff = align_of(node->lhs->cty->ptrto);  
+                    coeff = node->lhs->cty->ptrto->align;  
                 printf("    mov rdi, %d\n",  coeff);
                 printf("    mul rdi\n");
                 printf("    mov rdi, rax\n");

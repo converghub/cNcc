@@ -87,10 +87,11 @@ bool map_exist(Map *map, char *key) {
 }
 
 
-//
 Type *ptr_to(Type *base) {
     Type *ctype = malloc(sizeof(Type));
     ctype->ty = PTR;
+    ctype->align = 8;
+    ctype->size = 8;
     ctype->ptrto = base;
     return ctype;
 }
@@ -98,6 +99,8 @@ Type *ptr_to(Type *base) {
 Type *ary_of(Type *base, int len) {
     Type *cty = malloc(sizeof(Type));
     cty->ty = ARY;
+    cty->align = base->align;
+    cty->size = base->size * len;
     cty->aryof = base;
     cty->len = len;
     return cty;
@@ -107,34 +110,6 @@ Type *ctype_of_ary(Type *cty) {
     if (cty->aryof)
         return ctype_of_ary(cty->aryof);
     return cty;
-}
-
-int size_of(Type *cty) {
-    if (cty->ty == CHAR)
-        return 1;
-    else if (cty->ty == INT) 
-        return 4;
-    else if (cty->ty == PTR)
-        return 8;
-    else if (cty->ty == ARY)
-        return size_of(cty->aryof) * cty->len;
-    else
-        error("size_of(): invalid cty value.\n");
-        return 0;
-}
-
-int align_of(Type *cty) {
-    if (cty->ty == CHAR)
-        return 1;
-    else if (cty->ty == INT) 
-        return 4;
-    else if (cty->ty == PTR)
-        return 8;
-    else if (cty->ty == ARY)
-        return align_of(cty->aryof);
-    else
-        error("align_of(): invalid cty value.\n");
-        return 0;
 }
 
 int roundup(int num, int multiple) {

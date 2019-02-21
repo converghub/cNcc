@@ -155,6 +155,17 @@ int main() {
     EXPECT(3, ({ int a; a = (1,2,3); a; })  );
     EXPECT(4, ( ({ int a; a = (1,2,3); a; }), ({ int a; a = (1,2,3); a; }), ({ int a; a = (1,2,4); a; }) )  );
 
+    EXPECT(4, ({ struct {int a;} x; sizeof(x); }) );
+    EXPECT(8, ({ struct {int a; int b;} x; sizeof(x);  }) );
+    EXPECT(12, ({ struct {char a; char b; int c; char d;} x; sizeof(x); }) );
+    EXPECT(24, ({ struct {char a; char b; int c; char d; char *e;} x; sizeof(x); }) );
+    EXPECT(24, ({ struct {char *e; char a; char b; int c; char d;} x; sizeof(x); }) );
+    EXPECT(32, ({ struct {char a; char *e; char b; int c; char d;} x; sizeof(x); }) );
+    EXPECT(32, ({ struct {char a; char *e; char b; int c; char d; int f;} x; sizeof(x); }) );
+    EXPECT(3, ({ struct { int a; } x; x.a = 3; x.a; }) );
+    EXPECT(8, ({ struct { char a; int b; } x; x.a = 3; x.b = 5; x.a+x.b; }) );
+    EXPECT(8, ({ struct { int a; int b; } x; x.a = 3; x.b = 5; x.a+x.b; }) );
+
     printf("OK.\n");
     return 0;
 }

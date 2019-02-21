@@ -2,7 +2,7 @@
 
 extern Vector *strings;
 
-static Type int_cty = {INT, NULL};
+static Type int_cty = {INT, 4, 4, NULL};
 
 // Block scope
 typedef struct Blk {
@@ -41,7 +41,7 @@ static Var *new_global(Type *cty, char *name, char *data, int len) {
 
 static void check_lval(Node *node) {
   int ty = node->ty;
-  if (ty == ND_LVAR || ty == ND_GVAR || ty == ND_DEREF)
+  if (ty == ND_LVAR || ty == ND_GVAR || ty == ND_DEREF || ty == ND_DOT)
     return;
   error("not an lvalue: %d (%s)", ty, node->name);
 }
@@ -62,6 +62,7 @@ static bool check_push(Node *node) {
         case ND_FOR:
             switch (node->upper->ty) {
                 case ND_FUNC_DEF:
+                    return true;
                 case ND_IF:
                 case ND_WHILE:
                 case ND_DO_WHILE:
@@ -82,6 +83,7 @@ static bool check_push(Node *node) {
         case ND_GVAR:
         case ND_FUNC_CALL:
         case ND_DEREF:
+        case ND_DOT:
         case '!':   
         case '%':
         case '*':
@@ -123,6 +125,7 @@ static bool check_push(Node *node) {
                 case ND_FOR:
                 case ND_DEREF:
                 case ND_ADDR:
+                case ND_DOT:
                 case ND_RETURN:
                 case ND_SIZEOF:
                 case ND_ALIGNOF:
@@ -200,8 +203,8 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
         }
         case ND_VAR_DEF: {
             // Local variable definition
-            stacksize = roundup(stacksize, align_of(node->cty));
-            stacksize += size_of(node->cty);
+            stacksize = roundup(stacksize, node->cty->align);
+            stacksize += node->cty->size;
             node->offset = stacksize;
 
             Var *var = malloc(sizeof(Var));
@@ -265,6 +268,22 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
             node->cty = node->tr_stmt->cty;
             node->no_push = check_push(node);
             return node;
+        case ND_DOT:
+            node->expr = walk(node->expr, pfunc, node);
+            if (node->expr->cty->ty != STRUCT)
+                error("sema(): struct type expected before '.'");
+
+            Type *cty = node->expr->cty;
+            for (int i = 0; i < cty->mbrs->len; i++) {
+                Node *mbr = cty->mbrs->data[i];
+                if (strcmp(mbr->name, node->mbr_name))
+                    continue;
+                node->cty = mbr->cty;
+                node->offset = mbr->cty->offset;
+                node->no_push = check_push(node);
+                return node;
+            }
+            error("sema(): member missing %s", node->mbr_name);
         case '*':
         case '/':
         case '%':
@@ -323,7 +342,7 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
             Node *ret = malloc(sizeof(Node));
             ret->ty = ND_NUM;
             ret->cty = &int_cty;
-            ret->val = size_of(node->expr->cty);
+            ret->val = node->expr->cty->size;
             node->expr = ret;
             node->no_push = check_push(node);
             return node->expr;
@@ -333,7 +352,7 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
             Node *ret1 = malloc(sizeof(Node));
             ret1->ty = ND_NUM;
             ret1->cty = &int_cty;
-            ret1->val = align_of(node->expr->cty);
+            ret1->val = node->expr->cty->align;
             node->expr = ret1;
             node->no_push = check_push(node);
             return node->expr;

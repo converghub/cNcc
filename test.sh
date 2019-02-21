@@ -268,5 +268,18 @@ try 4 'int main() { return ( ({int a=1;a;}), ({int a=1; {{ {1;} }}  a;}), 4 ); }
 try 3 'int main() { return ({ int a; a = (1,2,3); a; }); }'
 try 4 'int main() { return ({ int a; a = (1,2,3); a; }), ({ int a; a = (1,2,3); a; }), ({ int a; a = (1,2,4); a; }); }'
 
+try 4 "int main() { struct {int a;} x; return sizeof(x); }"
+try 8 "int main() { struct {int a; int b;} x; return sizeof(x); }"
+try 12 "int main() { struct {char a; char b; int c; char d;} x; return sizeof(x); }"
+try 24 "int main() { struct {char a; char b; int c; char d; char *e;} x; return sizeof(x); }"
+try 24 "int main() { struct {char *e; char a; char b; int c; char d;} x; return sizeof(x); }"
+try 32 "int main() { struct {char a; char *e; char b; int c; char d;} x; return sizeof(x); }"
+try 32 "int main() { struct {char a; char *e; char b; int c; char d; int f;} x; return sizeof(x); }"
+
+try 3 "int main() { struct { int a; } x; x.a = 3; return x.a; }"
+try 8 "int main() { struct { char a; int b; } x; x.a = 3; x.b = 5; return x.a+x.b; }"
+try 8 "int main() { struct { int a; int b; } x; x.a = 3; x.b = 5; return x.a+x.b; }"
+try 10 "int main() { struct { int a; int b; char c; char d; } x; x.a = 3; x.b = 5; x.c=x.d=1; return x.a+x.b+x.c+x.d; }"
+try 5 "int main() { struct { char a; int b; } x; x.a = 3; x.b = 5; }"
 
 echo 'OK!'

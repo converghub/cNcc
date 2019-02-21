@@ -36,6 +36,7 @@ enum {
     TK_EXTERN,      // "extern"
     TK_INT,         // "int"
     TK_CHAR,        // "char"
+    TK_STRUCT,      // "struct"
     TK_IF,          // "if"
     TK_ELSE,        // "else"
     TK_DO,          // "do"
@@ -72,10 +73,13 @@ enum {
     CHAR,
     PTR,
     ARY,
+    STRUCT,
 };
 
 typedef struct Type {
     int ty;
+    int size;
+    int align;
 
     // Pointer
     struct Type *ptrto;
@@ -83,6 +87,10 @@ typedef struct Type {
     // Array
     struct Type *aryof;
     int len;
+
+    // Struct
+    Vector *mbrs;
+    int offset;
 } Type;
 
 
@@ -110,6 +118,7 @@ enum {
     ND_SIZEOF,      // sizeof
     ND_ALIGNOF,     // alignof
     ND_IDENT,       // Identifier
+    ND_STRUCT,      // Struct
     ND_VAR_DEF,     // Variable definition
     ND_LVAR,        // Local variable
     ND_GVAR,        // Global variable
@@ -119,6 +128,7 @@ enum {
     ND_FOR,         // for
     ND_DEREF,       // Pointer dereference : *
     ND_ADDR,        // Address-of operater : &
+    ND_DOT,         // Struct member access
     ND_EXPR_STMT,   // Expression statement
     ND_STMT_EXPR,   // Statement expression
     ND_CMPD_STMT,   // Compound statement
@@ -169,8 +179,13 @@ typedef struct Node {
     char *data;
     int len;
 
-    // Local variable
+    // Local variable, beginning of Struct
     int offset;
+
+    // Struct
+    Vector *mbrs;
+    // Struct member
+    char *mbr_name;
 
     // If
     struct Node *bl_expr;
