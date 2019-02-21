@@ -165,6 +165,7 @@ int main() {
     EXPECT(3, ({ struct { int a; } x; x.a = 3; x.a; }) );
     EXPECT(8, ({ struct { char a; int b; } x; x.a = 3; x.b = 5; x.a+x.b; }) );
     EXPECT(8, ({ struct { int a; int b; } x; x.a = 3; x.b = 5; x.a+x.b; }) );
+    EXPECT(8, ({ struct { int a; int b; } x; struct { int a; int b; } *p; p = &x; x.a = 3; x.b = 5; p->a + p->b; }) );
 
     printf("OK.\n");
     return 0;

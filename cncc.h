@@ -52,6 +52,7 @@ enum {
     TK_SHR,         // >>
     TK_INC,         // ++
     TK_DEC,         // --
+    TK_ARROW,       // ->
     TK_EOF,         // End of input
 };
 

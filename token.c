@@ -19,6 +19,7 @@ static struct symbol{
     {"||", TK_LOR},        {"<=", TK_LE},
     {">=", TK_GE},         {"_Alignof", TK_ALIGNOF}, {"<<", TK_SHL},
     {">>", TK_SHR},        {"++", TK_INC},           {"--", TK_DEC},
+    {"->", TK_ARROW},
 };
 
 

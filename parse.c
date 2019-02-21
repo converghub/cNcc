@@ -190,6 +190,24 @@ static Node *postfix() {
             continue;
         }
 
+        if (consume(TK_ARROW)) {
+            // struct_p->member iff *(struct_p).member
+            Node *node = malloc(sizeof(Node));
+            node->ty = ND_DOT;
+
+            Node *expr = malloc(sizeof(Node));
+            expr->ty = ND_DEREF;
+            expr->expr = lhs;
+
+            node->expr = expr;
+            if (GET_TK(tokens, pos)->ty != TK_IDENT)
+                error("variable name expected, but got %s", GET_TK(tokens, pos)->input);
+            node->mbr_name = GET_TK(tokens, pos)->name;
+            pos++;
+            lhs = node;
+            continue;
+        }
+
         if (consume(TK_INC)) {
             Node *node = malloc(sizeof(Node));
             node->ty = ND_POST_INC;
@@ -462,10 +480,6 @@ static Node* decl() {
 
     // Set C type name
     node->cty = set_ctype();
-//    if (node->cty->mbrs) {
-//        fprintf(stderr, "%s %d\n", ((Node*)node->cty->mbrs->data[0])->name, &node->cty->mbrs->data[0]);
-//        fprintf(stderr, "%s %d\n", ((Node*)node->cty->mbrs->data[1])->name, &node->cty->mbrs->data[1]);
-//    }
 
     // Store identifer
     if (GET_TK(tokens, pos)->ty != TK_IDENT)
