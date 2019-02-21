@@ -522,7 +522,7 @@ static Node* decl() {
     pos++;
 
     // Check & read array
-   node->cty = read_array(node->cty);
+    node->cty = read_array(node->cty);
 
     // Check initializer
     // TODO: add commas act as seperators in this line, not as an operator

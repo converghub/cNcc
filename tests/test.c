@@ -167,6 +167,44 @@ int main() {
     EXPECT(8, ({ struct { int a; int b; } x; x.a = 3; x.b = 5; x.a+x.b; }) );
     EXPECT(8, ({ struct { int a; int b; } x; struct { int a; int b; } *p; p = &x; x.a = 3; x.b = 5; p->a + p->b; }) );
     EXPECT(8, ({ struct tag_test { char a; int b; } x; struct tag_test *p = &x; x.a=3; x.b=5; p->a+p->b; }));
+    EXPECT(48, ({ struct { struct { int b; int c[5]; } a[2]; } x; sizeof(x); }));
+
+    EXPECT(8, ({
+    struct {
+      int hoge[2];
+      struct {
+        int b;
+        int c[5];
+      } a[2];
+	  } x;
+    x.hoge[0] = 3;
+    x.hoge[1] = 5;
+    x.hoge[0] + x.hoge[1];
+    }));
+
+    EXPECT(3, ({
+    struct {
+      int hoge[2];
+      struct {
+        int b;
+        int c[5];
+      } a[2];
+    } x;
+    x.a[0].b = 3;
+    x.a[0].b;
+    }));
+
+    EXPECT(8, ({
+    struct {
+      struct {
+        int b;
+        int c[5];
+      } a[2];
+    } x;
+    x.a[0].b = 3;
+    x.a[0].c[1] = 5;
+    x.a[0].b + x.a[0].c[1];
+    }));
 
     printf("OK.\n");
     return 0;

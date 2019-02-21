@@ -118,11 +118,13 @@ int roundup(int num, int multiple) {
     return (num + multiple - 1) & -multiple;
 }
 
-Node *addr_of(Node *base, Type *cty) {
+Node *addr_of(Node *base, Type *cty, Node *pfunc, Node *upper) {
     Node *node = calloc(1, sizeof(Node));
     node->ty = ND_ADDR;
     node->cty = ptr_to(cty);
     node->expr = base;
+    node->pfunc = pfunc;
+    node->upper = upper;
     return node;
 }
 

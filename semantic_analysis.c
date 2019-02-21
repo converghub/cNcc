@@ -192,9 +192,7 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
                 node->ty = ND_GVAR;
 
             if (sema_var->cty->ty == ARY && upper->ty != ND_SIZEOF && upper->ty != ND_ALIGNOF) {
-                node = addr_of(node, sema_var->cty->aryof);
-                node->pfunc = pfunc;
-                node->upper = upper;
+                node = addr_of(node, sema_var->cty->aryof, pfunc, upper);
             } else
                 node->cty = sema_var->cty;   
 
@@ -279,6 +277,9 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
                 if (strcmp(mbr->name, node->mbr_name))
                     continue;
                 node->cty = mbr->cty;
+                if (mbr->cty->ty == ARY)
+                    node = addr_of(node, node->cty->aryof, pfunc, upper);
+
                 node->offset = mbr->cty->offset;
                 node->no_push = check_push(node);
                 return node;
@@ -313,7 +314,8 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
         case ND_DEREF:
             node->expr = walk(node->expr, pfunc, node);
             if (node->expr->cty->ty != PTR)
-                error("sema(): operand must be a pointer");   
+                error("sema(): operand must be a pointer, but got cty->ty: %d. upper node type: %d", 
+                        node->expr->cty->ty, node->upper->ty);   
             node->cty = node->expr->cty->ptrto;
             node->no_push = check_push(node);
             return node;

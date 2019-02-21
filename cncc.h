@@ -221,7 +221,7 @@ int size_of(Type *cty);
 int align_of(Type *cty);
 Type *ary_of(Type *base, int len);
 Type *ctype_of_ary(Type *cty);
-Node *addr_of(Node *base, Type *cty);
+Node *addr_of(Node *base, Type *cty, Node *pfunc, Node *upper);
 int roundup(int num, int multiple);
 
 // logger.c

@@ -283,5 +283,39 @@ try 10 "int main() { struct { int a; int b; char c; char d; } x; x.a = 3; x.b = 
 try 5 "int main() { struct { char a; int b; } x; x.a = 3; x.b = 5; }"
 try 8 "int main() { struct { char a; int b; } x; struct { char a; int b;} *p = &x; x.a = 3; x.b = 5; return p->a + p->b; }"
 try 8 "int main() { struct tag_test { char a; int b; } x; struct tag_test *p = &x; x.a=3; x.b=5; return p->a+p->b; }"
+try 8 "int main() {
+          struct {
+            int hoge[2];
+            struct {
+              int b;
+              int c[5];
+            } a[2];
+          } x;
+          x.hoge[0] = 3;
+          x.hoge[1] = 5;
+          x.hoge[0] + x.hoge[1];
+          }"
+try 3 "int main() {
+          struct {
+            int hoge[2];
+            struct {
+              int b;
+              int c[5];
+            } a[2];
+          } x;
+          x.a[0].b = 3;
+          x.a[0].b;
+          }"
+try 8 "int main() {
+          struct {
+            struct {
+              int b;
+              int c[5];
+            } a[2];
+          } x;
+          x.a[0].b = 3;
+          x.a[0].c[1] = 5;
+          x.a[0].b + x.a[0].c[1];
+          }"
 
 echo 'OK!'
