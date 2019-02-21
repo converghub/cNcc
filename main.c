@@ -68,8 +68,8 @@ static char *read_file(char *filename) {
 
     file_size = stbuf.st_size;
 
-    // malloc buffer and read
-    input = malloc(file_size + 1);
+    // calloc buffer and read
+    input = calloc(1, file_size + 1);
     fread(input, 1, file_size + 1, fp);
     input[file_size] = '\0';
     fclose(fp);

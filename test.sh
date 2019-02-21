@@ -282,5 +282,6 @@ try 8 "int main() { struct { int a; int b; } x; x.a = 3; x.b = 5; return x.a+x.b
 try 10 "int main() { struct { int a; int b; char c; char d; } x; x.a = 3; x.b = 5; x.c=x.d=1; return x.a+x.b+x.c+x.d; }"
 try 5 "int main() { struct { char a; int b; } x; x.a = 3; x.b = 5; }"
 try 8 "int main() { struct { char a; int b; } x; struct { char a; int b;} *p = &x; x.a = 3; x.b = 5; return p->a + p->b; }"
+try 8 "int main() { struct tag_test { char a; int b; } x; struct tag_test *p = &x; x.a=3; x.b=5; return p->a+p->b; }"
 
 echo 'OK!'

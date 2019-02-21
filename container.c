@@ -32,8 +32,8 @@ static int expect(int line, int expected, int actual) {
 
 // Vector
 Vector *new_vector() {
-    Vector *vec = malloc(sizeof(Vector));
-    vec->data = malloc(sizeof(void *) * 16);
+    Vector *vec = calloc(1, sizeof(Vector));
+    vec->data = calloc(1, sizeof(void *) * 16);
     vec->capacity = 16;
     vec->len = 0;
     return vec;
@@ -50,7 +50,7 @@ void vec_push(Vector *vec, void *elem) {
 
 // Map
 Map *new_map() {
-    Map *map = malloc(sizeof(Map));
+    Map *map = calloc(1, sizeof(Map));
     map->keys = new_vector();
     map->vals = new_vector();
     return map;
@@ -88,7 +88,7 @@ bool map_exist(Map *map, char *key) {
 
 
 Type *ptr_to(Type *base) {
-    Type *ctype = malloc(sizeof(Type));
+    Type *ctype = calloc(1, sizeof(Type));
     ctype->ty = PTR;
     ctype->align = 8;
     ctype->size = 8;
@@ -97,7 +97,7 @@ Type *ptr_to(Type *base) {
 }
 
 Type *ary_of(Type *base, int len) {
-    Type *cty = malloc(sizeof(Type));
+    Type *cty = calloc(1, sizeof(Type));
     cty->ty = ARY;
     cty->align = base->align;
     cty->size = base->size * len;
@@ -119,7 +119,7 @@ int roundup(int num, int multiple) {
 }
 
 Node *addr_of(Node *base, Type *cty) {
-    Node *node = malloc(sizeof(Node));
+    Node *node = calloc(1, sizeof(Node));
     node->ty = ND_ADDR;
     node->cty = ptr_to(cty);
     node->expr = base;

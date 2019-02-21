@@ -14,7 +14,7 @@ static Blk *blk;
 static int stacksize;
 
 static Blk *new_blk(Blk *superset) {
-    Blk *blk = malloc(sizeof(Blk));
+    Blk *blk = calloc(1, sizeof(Blk));
     blk->vars = new_map();
     blk->superset = superset;
     return blk;
@@ -30,7 +30,7 @@ static Var *find_var(char *name) {
 }
 
 static Var *new_global(Type *cty, char *name, char *data, int len) {
-    Var *var = malloc(sizeof(Var));
+    Var *var = calloc(1, sizeof(Var));
     var->cty = cty;
     var->is_local = false;
     var->name = name;
@@ -207,7 +207,7 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
             stacksize += node->cty->size;
             node->offset = stacksize;
 
-            Var *var = malloc(sizeof(Var));
+            Var *var = calloc(1, sizeof(Var));
             var->cty = node->cty;
             var->is_local = true;
             var->offset = stacksize;
@@ -339,7 +339,7 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
         case ND_SIZEOF:
             node->expr = walk(node->expr, pfunc, node);
 
-            Node *ret = malloc(sizeof(Node));
+            Node *ret = calloc(1, sizeof(Node));
             ret->ty = ND_NUM;
             ret->cty = &int_cty;
             ret->val = node->expr->cty->size;
@@ -349,7 +349,7 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
         case ND_ALIGNOF:
             node->expr = walk(node->expr, pfunc, node);
 
-            Node *ret1 = malloc(sizeof(Node));
+            Node *ret1 = calloc(1, sizeof(Node));
             ret1->ty = ND_NUM;
             ret1->cty = &int_cty;
             ret1->val = node->expr->cty->align;
