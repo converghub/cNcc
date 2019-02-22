@@ -34,6 +34,7 @@ enum {
     TK_ALIGNOF,     // "_Alignof"
     TK_IDENT,       // Identifier
     TK_EXTERN,      // "extern"
+    TK_VOID,        // "void"
     TK_INT,         // "int"
     TK_CHAR,        // "char"
     TK_STRUCT,      // "struct"
@@ -70,6 +71,7 @@ typedef struct {
 
 // Pointer
 enum {
+    VOID,
     INT,
     CHAR,
     PTR,

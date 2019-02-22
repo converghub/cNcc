@@ -2,6 +2,7 @@
 
 extern Vector *strings;
 
+static Type void_cty = {VOID, 0, 0, NULL};
 static Type int_cty = {INT, 4, 4, NULL};
 
 // Block scope
@@ -315,7 +316,9 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
             node->expr = walk(node->expr, pfunc, node);
             if (node->expr->cty->ty != PTR)
                 error("sema(): operand must be a pointer, but got cty->ty: %d. upper node type: %d", 
-                        node->expr->cty->ty, node->upper->ty);   
+                        node->expr->cty->ty, node->upper->ty);  
+            if (node->expr->cty->ptrto->ty == VOID)
+                error("sema(): cannot dereference void pointer."); 
             node->cty = node->expr->cty->ptrto;
             node->no_push = check_push(node);
             return node;
@@ -343,7 +346,8 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
 
             Node *ret = calloc(1, sizeof(Node));
             ret->ty = ND_NUM;
-            ret->cty = &int_cty;
+            ret->cty = calloc(1, sizeof(Type));
+            *ret->cty = int_cty;
             ret->val = node->expr->cty->size;
             node->expr = ret;
             node->no_push = check_push(node);
@@ -353,7 +357,8 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
 
             Node *ret1 = calloc(1, sizeof(Node));
             ret1->ty = ND_NUM;
-            ret1->cty = &int_cty;
+            ret1->cty = calloc(1, sizeof(Type));
+            *ret1->cty = int_cty;
             ret1->val = node->expr->cty->align;
             node->expr = ret1;
             node->no_push = check_push(node);
@@ -367,7 +372,8 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
             for (int i = 0; i <node->args->len; i++)
                 node->args->data[i] = walk(node->args->data[i], pfunc, node);
             // cutrrently only "int" is supported
-            node->cty = &int_cty;
+            node->cty = calloc(1, sizeof(Type));
+            *node->cty = int_cty;
             node->no_push = check_push(node);
             return node;
         case ND_CMPD_STMT:
@@ -397,8 +403,8 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
                     error("sema(): The last thing in Statement expressions should be an expression");                
                 node->cty = last->cty;
             } else {
-                // TODO: cutrrently "int", but should be "void"
-                node->cty = &int_cty;
+                node->cty = calloc(1, sizeof(Type));
+                *node->cty = void_cty;
             }
             node->no_push = check_push(node);
             blk = blk->superset;

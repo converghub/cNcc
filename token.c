@@ -63,6 +63,7 @@ static Map *new_keywords() {
     map_puti(map, "return", TK_RETURN);
     map_puti(map, "while", TK_WHILE);
     map_puti(map, "for", TK_FOR);
+    map_puti(map, "void", TK_VOID);
     map_puti(map, "int", TK_INT);
     map_puti(map, "char", TK_CHAR);
     map_puti(map, "struct", TK_STRUCT);

@@ -5,6 +5,7 @@
 static Vector *tokens;
 static int pos;
 static int globals_counter;
+static Type void_cty = {VOID, 0, 0, NULL};
 static Type int_cty = {INT, 4, 4, NULL};
 static Type char_cty = {CHAR, 1, 1, NULL};
 static Node null_stmt = {ND_NULL};
@@ -50,7 +51,7 @@ static int consume(int ty) {
 
 static bool is_ctype() {
     int ty = GET_TK(tokens, pos)->ty;
-    return ty == TK_INT || ty == TK_CHAR || ty == TK_STRUCT;
+    return ty == TK_VOID || ty == TK_INT || ty == TK_CHAR || ty == TK_STRUCT;
 }
 
 static Type *set_ctype() {
@@ -60,6 +61,10 @@ static Type *set_ctype() {
     
     Type *cty = calloc(1, sizeof(Type));
     switch (GET_TK(tokens, pos)->ty) {
+        case TK_VOID:
+            *cty = void_cty;
+            pos++;
+            break;
         case TK_INT:
             *cty = int_cty;
             pos++;
@@ -523,6 +528,8 @@ static Node* decl() {
 
     // Check & read array
     node->cty = read_array(node->cty);
+    if (node->cty->ty == VOID)
+        error("decl(): unexpected void variable %s\n", node->name);
 
     // Check initializer
     // TODO: add commas act as seperators in this line, not as an operator
