@@ -10,17 +10,19 @@ static Type int_cty = {INT, 4, 4, NULL};
 static Type char_cty = {CHAR, 1, 1, NULL};
 static Node null_stmt = {ND_NULL};
 
-typedef struct Tag {
+typedef struct Scp {
+    Map *typedefs;
     Map *tags;
-    struct Tag *superset;
-} Tag;
+    struct Scp *superset;
+} Scp;
 
 // for semantic_analysis.c, codegen.c
 Vector *strings;
-Tag *strct_tag;
+Scp *scope;
 
-static Tag *new_tag(Tag *superset) {
-    Tag *new = calloc(1, sizeof(Tag));
+static Scp *new_tag(Scp *superset) {
+    Scp *new = calloc(1, sizeof(Scp));
+    new->typedefs = new_map();
     new->tags = new_map();
     new->superset = superset;
     return new;
@@ -51,7 +53,9 @@ static int consume(int ty) {
 
 static bool is_ctype() {
     int ty = GET_TK(tokens, pos)->ty;
-    return ty == TK_VOID || ty == TK_INT || ty == TK_CHAR || ty == TK_STRUCT;
+    if (ty == TK_IDENT)
+        return map_exist(scope->typedefs, GET_TK(tokens, pos)->name);
+    return ty == TK_VOID || ty == TK_INT || ty == TK_CHAR || ty == TK_STRUCT || ty == TK_TYPEDEF;
 }
 
 static Type *set_ctype() {
@@ -61,6 +65,11 @@ static Type *set_ctype() {
     
     Type *cty = calloc(1, sizeof(Type));
     switch (GET_TK(tokens, pos)->ty) {
+        case TK_IDENT:
+            cty = map_get(scope->typedefs, GET_TK(tokens, pos)->name);
+            if (cty)
+                pos++;
+            break;
         case TK_VOID:
             *cty = void_cty;
             pos++;
@@ -97,9 +106,9 @@ static Type *set_ctype() {
                 error("set_ctype(): Bad struct definition. input: %s", GET_TK(tokens, pos)->input);
 
             if (tag && members) {
-                map_put(strct_tag->tags, tag, members);
+                map_put(scope->tags, tag, members);
             } else if (tag && !members) {
-                members = map_get(strct_tag->tags, tag);
+                members = map_get(scope->tags, tag);
                 if (!members)
                     error("set_ctype(): Incomplete type: %s", tag);
             }
@@ -121,6 +130,8 @@ static Type *set_ctype() {
             cty->size = roundup(offset, cty->align);
             cty->mbrs = members;
             break;
+        default:
+            error("set_ctype(): Unexpected ctype %d", GET_TK(tokens, pos)->ty);
     }
 
     while (consume('*'))
@@ -542,7 +553,22 @@ static Node* decl() {
 static Node *stmt() {
     Node *node = calloc(1, sizeof(Node));
 
-    if (consume(TK_IF)) {
+    if (is_ctype()) {
+        if (GET_TK(tokens, pos)->ty == TK_TYPEDEF) {
+            pos++;
+            node = decl();
+            expect(';');
+            assert(node->name);
+            map_put(scope->typedefs, node->name, node->cty);
+            *node = null_stmt;
+            return node;
+        } else {
+            node = decl();
+            expect(';');
+            return node;
+        }
+
+    } else if (consume(TK_IF)) {
         node->ty = ND_IF;
         // condition
         expect('(');
@@ -564,12 +590,6 @@ static Node *stmt() {
                 node->els_stmt = stmt();
             }
         }
-        return node;
-
-    } else if (GET_TK(tokens, pos)->ty == TK_INT || GET_TK(tokens, pos)->ty == TK_CHAR
-                || GET_TK(tokens, pos)->ty == TK_STRUCT) {
-        node = decl();
-        expect(';');
         return node;
 
     } else if (consume(TK_RETURN)) {
@@ -632,7 +652,8 @@ static Node *stmt() {
             vec_push(node->stmts, stmt());
         return node;
     } else if (consume(';')) {
-        return &null_stmt;
+        *node = null_stmt;
+        return node;
     } else {
         node->ty = ND_EXPR_STMT;
         node->expr = comma();
@@ -647,12 +668,12 @@ static Node *cmpd_stmt() {
     node->ty = ND_CMPD_STMT;
     node->stmts = new_vector();
 
-    strct_tag = new_tag(strct_tag);
+    scope = new_tag(scope);
 
     while (GET_TK(tokens, pos)->ty != '}')
         vec_push(node->stmts, stmt());
 
-    strct_tag = strct_tag->superset;
+    scope = scope->superset;
     return node;
 }
 
@@ -724,7 +745,7 @@ Vector *parse(Vector *tk) {
     tokens = tk;
     Vector *v = new_vector();
     globals_counter = 0;
-    strct_tag = new_tag(NULL);
+    scope = new_tag(NULL);
 
     while (GET_TK(tokens, pos)->ty != TK_EOF) {
         vec_push(v, top());

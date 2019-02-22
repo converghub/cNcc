@@ -34,6 +34,7 @@ enum {
     TK_ALIGNOF,     // "_Alignof"
     TK_IDENT,       // Identifier
     TK_EXTERN,      // "extern"
+    TK_TYPEDEF,     // "typedef"
     TK_VOID,        // "void"
     TK_INT,         // "int"
     TK_CHAR,        // "char"

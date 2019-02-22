@@ -205,6 +205,10 @@ int main() {
     x.a[0].c[1] = 5;
     x.a[0].b + x.a[0].c[1];
     }));
+    
+    EXPECT(3, ({ typedef int foo; foo x = 3; x; }));
+    EXPECT(5, ({ typedef struct foo { int a; int b; } foo; foo x; x.a=3; x.b=2; x.a+x.b; }));
+    EXPECT(10, ({ typedef struct foo { int a; int *b; } foo; foo x; x.a=5; x.b = &x.a; x.a + *(x.b); }));
 
     printf("OK.\n");
     return 0;
