@@ -228,11 +228,13 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
             node->no_push = check_push(node);
             return node;
         case ND_FOR:
+            blk = new_blk(blk);
             node->init = walk(node->init, pfunc, node);
             node->bl_expr = walk(node->bl_expr, pfunc, node);
             node->inc = walk(node->inc, pfunc, node);
             node->body = walk(node->body, pfunc, node);
             node->no_push = check_push(node);
+            blk = blk->superset;
             return node;
         case ND_WHILE:
         case ND_DO_WHILE:

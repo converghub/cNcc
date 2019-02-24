@@ -635,7 +635,7 @@ static Node *stmt() {
     } else if (consume(TK_FOR)) {
         node->ty = ND_FOR;
         expect('(');
-        if (GET_TK(tokens, pos)->ty == TK_INT || GET_TK(tokens, pos)->ty == TK_CHAR) {
+        if (is_ctype()) {
             node->init = decl();
         } else
             node->init = comma();
