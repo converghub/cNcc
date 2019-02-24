@@ -108,6 +108,7 @@ static bool check_push(Node *node) {
         case ND_LAND:
         case ND_SHL:
         case ND_SHR:
+        case ND_NEG:
         case ND_PRE_INC:
         case ND_PRE_DEC:
         case ND_POST_INC:
@@ -151,6 +152,7 @@ static bool check_push(Node *node) {
                 case ND_LAND:
                 case ND_SHL:
                 case ND_SHR:
+                case ND_NEG:
                 case ND_PRE_INC:
                 case ND_PRE_DEC:
                 case ND_POST_INC:
@@ -322,6 +324,7 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
             node->cty = node->expr->cty->ptrto;
             node->no_push = check_push(node);
             return node;
+        case ND_NEG:
         case ND_PRE_INC:
         case ND_PRE_DEC:
         case ND_POST_INC:

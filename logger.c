@@ -39,6 +39,7 @@ void dump_tokens(Vector *tks) {
     fprintf(fplog, "ND_LAND: %d\n", ND_LAND);
     fprintf(fplog, "ND_SHL: %d\n", ND_SHL);
     fprintf(fplog, "ND_SHR: %d\n", ND_SHR);
+    fprintf(fplog, "ND_NEG: %d\n", ND_NEG);
     fprintf(fplog, "ND_PRE_INC: %d\n", ND_PRE_INC);
     fprintf(fplog, "ND_PRE_DEC: %d\n", ND_PRE_DEC);
     fprintf(fplog, "ND_POST_INC: %d\n", ND_POST_INC);

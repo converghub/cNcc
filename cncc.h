@@ -146,6 +146,7 @@ enum {
     ND_LAND,        // Logical AND operation : &&
     ND_SHL,         // : <<
     ND_SHR,         // : >>
+    ND_NEG,         // : -
     ND_PRE_INC,     // pre ++
     ND_PRE_DEC,     // pre --
     ND_POST_INC,    // post ++

@@ -425,6 +425,23 @@ void gen(Node *node) {
         return;
     }
 
+    if (node->ty == ND_NEG) {
+        if (!node->expr) error("HOGE!");
+        gen(node->expr);
+        printf("    pop rax\n");
+        if (node->expr->cty->align == 4) {
+            printf("    mov rcx, 0xFFFFFFFF\n");
+            printf("    and rax, rcx\n");            
+        }
+        else if (node->expr->cty->align == 1) {
+            printf("    and rax, 0xFF\n");
+        } 
+        printf("neg rax\n");
+        if (!node->no_push)
+            printf("    push rax\n");
+        return;
+    }
+
     if (node->ty == '~') {
         gen(node->expr);
         printf("    pop rax\n");

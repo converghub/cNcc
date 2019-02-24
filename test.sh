@@ -43,6 +43,7 @@ long **alloc_ptr_ptr(long x) {
 EOF
 
 try 3 "int main() { 3; }"
+try 3 "int main() { 0-(-3); }"
 try 21 'int main() { 5+20-4; }'
 try 41 'int main() { 12 + 34 - 5; }'
 try 47 'int main() { 5+6*7; }'

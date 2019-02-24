@@ -210,6 +210,8 @@ int main() {
     EXPECT(5, ({ typedef struct foo { int a; int b; } foo; foo x; x.a=3; x.b=2; x.a+x.b; }));
     EXPECT(10, ({ typedef struct foo { int a; int *b; } foo; foo x; x.a=5; x.b = &x.a; x.a + *(x.b); }));
 
+    EXPECT(0-3, -3);
+
     printf("OK.\n");
     return 0;
 }

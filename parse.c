@@ -289,6 +289,12 @@ static Node *postfix() {
 
 
 static Node *unary() {
+    if (consume('-')) {
+        Node *node = calloc(1, sizeof(Node));
+        node->ty = ND_NEG;
+        node->expr = unary();
+        return node;
+    }
     if (consume('*')) {
         Node *node = calloc(1, sizeof(Node));
         node->ty = ND_DEREF;
