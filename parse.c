@@ -635,15 +635,28 @@ static Node *stmt() {
     } else if (consume(TK_FOR)) {
         node->ty = ND_FOR;
         expect('(');
-        if (is_ctype()) {
+        // init
+        if (is_ctype())
             node->init = decl();
-        } else
+        else if (GET_TK(tokens, pos)->ty == ';')
+            node->init = &null_stmt;
+        else
             node->init = comma();
         expect(';');
-        node->bl_expr = comma();
+
+        // cond
+        if (GET_TK(tokens, pos)->ty == ';')
+            node->bl_expr = &null_stmt;
+        else
+            node->bl_expr = comma();
         expect(';');
-        node->inc = comma();
+        // inc
+        if (GET_TK(tokens, pos)->ty == ')')
+            node->inc = &null_stmt;
+        else
+            node->inc = comma();
         expect(')');
+        // body
         if(consume('{')) {
             node->body = cmpd_stmt();
             expect('}');

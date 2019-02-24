@@ -193,16 +193,21 @@ void gen(Node *node) {
     if (node->ty == ND_FOR) {
         int for_label = label_counter++;
         int for_end = label_counter++;
-
-        gen(node->init);
-        printf("    pop rax\n");
+        // init
+        if (node->init->ty != ND_NULL) {
+            gen(node->init);
+            printf("    pop rax\n");
+        }
 
         printf(".for_%d:\n", for_label);
-        gen(node->bl_expr);
-        printf("    pop rax\n");
-        printf("    cmp rax, 0\n");
-        printf("    je .for_end_%d\n", for_end);
-
+        // cond
+        if (node->bl_expr->ty != ND_NULL) {
+            gen(node->bl_expr);
+            printf("    pop rax\n");
+            printf("    cmp rax, 0\n");
+            printf("    je .for_end_%d\n", for_end);
+        }
+        // body
         if (node->body->stmts != NULL) {
             for (int i = 0; i < node->body->stmts->len; i++) {
                 gen(node->body->stmts->data[i]);
@@ -214,9 +219,11 @@ void gen(Node *node) {
             if (node->no_push)
                 printf("    pop rax\n");
         }
-
-        gen(node->inc);
-        printf("    pop rax\n");
+        // inc
+        if (node->inc->ty != ND_NULL) {
+            gen(node->inc);
+            printf("    pop rax\n");
+        }
         printf("    jmp .for_%d\n", for_label);
         printf(".for_end_%d:\n", for_end);
         return;

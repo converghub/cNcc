@@ -98,6 +98,7 @@ int main() {
     EXPECT(60, ({ int sum=0; for (int i=10; i<15; i=i+1) sum = sum + i; sum; }) );
     EXPECT(60, ({ int sum=0; for (int i=10; i<15; i=i+1) {sum = sum + i; sum = sum + 0;} sum; }) );
     EXPECT(1, ({ int sum=0; int i=1; for (int i=10; i<15; i=i+1) {sum = sum + i; sum = sum + 0;} i; }) );
+    EXPECT(10, ({ int i=0; for (;i<10;) { i++; } i; }));
 
     EXPECT(4, ({ int b; int c = f(f(b=1)); c; }) );
     EXPECT(9, ({ int e; int f; int d = 1; int c = f2( f2(d, e=1), f2(1, f=1) ); c; }) );

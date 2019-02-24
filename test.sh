@@ -117,6 +117,7 @@ try 45 'int main() { int x=0; int y=0; do { y=y+x; x=x+1; } while (x < 10); retu
 try 60 'int main() {int sum=0; for (int i=10; i<15; i=i+1) sum = sum + i; return sum;}'
 try 60 'int main() {int sum=0; for (int i=10; i<15; i=i+1) {sum = sum + i; sum = sum + 0;} return sum;}'
 try 1 'int main() {int sum=0; int i = 1; for (int i=10; i<15; i=i+1) sum = sum + i; return i;}'
+try 10 'int main() { int i=0; for (; i < 10 ;) { i++; } return i;  }'
 
 try 1 "int main(){(1 == 1) && (2 == 2);}"
 try 0 "int main(){(1 == 1) && (2 == 0);}"
