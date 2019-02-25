@@ -9,6 +9,7 @@ static Type void_cty = {VOID, 0, 0, NULL};
 static Type int_cty = {INT, 4, 4, NULL};
 static Type char_cty = {CHAR, 1, 1, NULL};
 static Node null_stmt = {ND_NULL};
+static Node break_stmt = {ND_BREAK};
 
 typedef struct Scp {
     Map *typedefs;
@@ -671,7 +672,10 @@ static Node *stmt() {
             vec_push(node->stmts, stmt());
         return node;
     } else if (consume(';')) {
-        *node = null_stmt;
+        node = &null_stmt;
+        return node;
+    } else if (consume(TK_BREAK)) {
+        node = &break_stmt;
         return node;
     } else {
         node->ty = ND_EXPR_STMT;

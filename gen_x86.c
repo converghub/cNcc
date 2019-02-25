@@ -7,6 +7,7 @@ static char *args_reg8[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
 static char *args_reg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
 static char *args_reg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 static int label_counter = 0;
+static int break_label;
 
 // gen
 static void gen_lval(Node *node) {
@@ -86,32 +87,23 @@ void gen(Node *node) {
         return;
     }
 
-    if (node->ty == ND_STMT_EXPR) {
-        // expr_node->ty is ND_CMPD_STMT
-        Node *expr_node = node->stmt_expr;
-        for (int i = 0; i < expr_node->stmts->len; i++) 
-            gen(expr_node->stmts->data[i]);
-        if (node->no_push) 
-            printf("    pop rax\n");
-        return;
-    }
-
     if (node->ty == ND_IF) {
         int if_else_label = label_counter++;
         gen(node->bl_expr);
-
-        printf("    pop rax\n");
+        if (!node->bl_expr->no_push)
+            printf("    pop rax\n");
         printf("    cmp rax, 0\n");
         printf("    je .else_%d\n", if_else_label);
 
         if (node->tr_stmt->stmts != NULL) {
-            for (int i = 0; i < node->tr_stmt->stmts->len; i++) 
+            for (int i = 0; i < node->tr_stmt->stmts->len; i++) {
                 gen(node->tr_stmt->stmts->data[i]);
-                if (node->no_push)
+                if ( !((Node*)node->tr_stmt->stmts->data[i])->no_push )
                     printf("    pop rax\n");
+            }
         } else {
             gen(node->tr_stmt);
-            if (node->no_push)
+            if (!node->tr_stmt->no_push)
                 printf("    pop rax\n");
         }
 
@@ -122,12 +114,12 @@ void gen(Node *node) {
             if (node->els_stmt->stmts != NULL) {
                 for (int i = 0; i < node->els_stmt->stmts->len; i++) {
                     gen(node->els_stmt->stmts->data[i]);
-                    if (node->no_push)
+                    if ( !((Node*)node->els_stmt->stmts->data[i])->no_push )
                         printf("    pop rax\n");
                 }
             } else {
                 gen(node->els_stmt);
-                if (node->no_push)
+                if (!node->els_stmt->no_push)
                     printf("    pop rax\n");
             }
         }
@@ -141,18 +133,20 @@ void gen(Node *node) {
 
         printf(".while_%d:\n", while_label);
         gen(node->bl_expr);
-        printf("    pop rax\n");
+        if (!node->bl_expr->no_push)
+            printf("    pop rax\n");
         printf("    cmp rax, 0\n");
         printf("    je .while_end_%d\n", while_end);
 
         if (node->body->stmts != NULL) {
-            for (int i = 0; i < node->body->stmts->len; i++)
+            for (int i = 0; i < node->body->stmts->len; i++) {
                 gen(node->body->stmts->data[i]);
-                if (node->no_push)
+                if ( !((Node*)node->body->stmts->data[i])->no_push )
                     printf("    pop rax\n");
+            }
         } else {
             gen(node->body);
-            if (node->no_push)
+            if (!node->body->no_push)
                 printf("    pop rax\n");
         }
 
@@ -164,46 +158,54 @@ void gen(Node *node) {
     if (node->ty == ND_DO_WHILE) {
         int do_while_label = label_counter++;
         int do_while_end = label_counter++;
+        break_label = label_counter++;
+        int here_break_label = break_label;
 
         printf(".do_while_%d:\n", do_while_label);
 
         if (node->body->stmts != NULL) {
             for (int i = 0; i < node->body->stmts->len; i++) {
                 gen(node->body->stmts->data[i]);
-                if (node->no_push)
+                if ( !((Node*)node->body->stmts->data[i])->no_push )
                     printf("    pop rax\n");
             }
         } else {
             gen(node->body);
-            if (node->no_push)
+            if (!node->body->no_push)
                 printf("    pop rax\n");
         }
 
 
         gen(node->bl_expr);
-        printf("    pop rax\n");
+        if (!node->bl_expr->no_push)
+            printf("    pop rax\n");
         printf("    cmp rax, 0\n");
         printf("    je .do_while_end_%d\n", do_while_end);
 
         printf("    jmp .do_while_%d\n", do_while_label);
         printf(".do_while_end_%d:\n", do_while_end);
+        printf(".break%d:\n", here_break_label);
         return;
     }
 
     if (node->ty == ND_FOR) {
         int for_label = label_counter++;
         int for_end = label_counter++;
+        break_label = label_counter++;
+        int here_break_label = break_label;
         // init
         if (node->init->ty != ND_NULL) {
             gen(node->init);
-            printf("    pop rax\n");
+            if (!node->init->no_push)
+                printf("    pop rax\n");
         }
 
         printf(".for_%d:\n", for_label);
         // cond
         if (node->bl_expr->ty != ND_NULL) {
             gen(node->bl_expr);
-            printf("    pop rax\n");
+            if (!node->bl_expr->no_push)
+                printf("    pop rax\n");
             printf("    cmp rax, 0\n");
             printf("    je .for_end_%d\n", for_end);
         }
@@ -211,21 +213,37 @@ void gen(Node *node) {
         if (node->body->stmts != NULL) {
             for (int i = 0; i < node->body->stmts->len; i++) {
                 gen(node->body->stmts->data[i]);
-                if (node->no_push)
+                if ( !((Node*)node->body->stmts->data[i])->no_push )
                     printf("    pop rax\n");
             }
         } else {
             gen(node->body);
-            if (node->no_push)
+            if (!node->body->no_push)
                 printf("    pop rax\n");
         }
         // inc
         if (node->inc->ty != ND_NULL) {
             gen(node->inc);
-            printf("    pop rax\n");
+            if(!node->inc->no_push)
+                printf("    pop rax\n");
         }
         printf("    jmp .for_%d\n", for_label);
         printf(".for_end_%d:\n", for_end);
+        printf(".break%d:\n", here_break_label);
+        return;
+    }
+
+    if (node->ty == ND_STMT_EXPR) {
+        // expr_node->ty is ND_CMPD_STMT
+        Node *expr_node = node->stmt_expr;
+        for (int i = 0; i < expr_node->stmts->len; i++)
+            gen(expr_node->stmts->data[i]);
+        /* the last stmt's "no_push" should be always false 
+           (see check_push() in semantic_analysis.c),  
+           so the following is for an upper node like other expressions. */           
+        printf("    pop rax\n");
+        if (!node->no_push)
+            printf("    push rax\n");
         return;
     }
 
@@ -494,6 +512,11 @@ void gen(Node *node) {
             }
         }
         printf(".cndtnl_end_%d:\n", cndtnl_label);
+        return;
+    }
+
+    if (node->ty == ND_BREAK) {
+        printf("    jmp .break%d\n", break_label);
         return;
     }
 

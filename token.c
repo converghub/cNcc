@@ -72,6 +72,7 @@ static Map *new_keywords() {
     map_puti(map, "extern", TK_EXTERN);
     map_puti(map, "do", TK_DO);
     map_puti(map, "_Alignof", TK_ALIGNOF);
+    map_puti(map, "break", TK_BREAK);
     return map;
 }
 

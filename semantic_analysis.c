@@ -63,12 +63,11 @@ static bool check_push(Node *node) {
         case ND_FOR:
             switch (node->upper->ty) {
                 case ND_FUNC_DEF:
-                    return true;
                 case ND_IF:
                 case ND_WHILE:
                 case ND_DO_WHILE:
                 case ND_FOR:
-                    return false;
+                    return true;
                 case ND_CMPD_STMT:
                     return check_push(node->upper);
                 case ND_STMT_EXPR:
@@ -416,6 +415,7 @@ static Node *walk(Node *node, Node *pfunc, Node *upper) {
             return node;
         }
         case ND_NULL:
+        case ND_BREAK:
             return node;
         default:
             assert(0 && "unknown node type");

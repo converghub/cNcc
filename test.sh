@@ -118,6 +118,7 @@ try 60 'int main() {int sum=0; for (int i=10; i<15; i=i+1) sum = sum + i; return
 try 60 'int main() {int sum=0; for (int i=10; i<15; i=i+1) {sum = sum + i; sum = sum + 0;} return sum;}'
 try 1 'int main() {int sum=0; int i = 1; for (int i=10; i<15; i=i+1) sum = sum + i; return i;}'
 try 10 'int main() { int i=0; for (; i < 10 ;) { i++; } return i;  }'
+try 5 'int main() { int i=0; for (0; i < 10; i++) if (i==5) break; i; }'
 
 try 1 "int main(){(1 == 1) && (2 == 2);}"
 try 0 "int main(){(1 == 1) && (2 == 0);}"

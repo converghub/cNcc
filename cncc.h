@@ -44,6 +44,7 @@ enum {
     TK_DO,          // "do"
     TK_WHILE,       // "while"
     TK_FOR,         // "for"
+    TK_BREAK,       // "break"
     TK_EQ,          // ==
     TK_NE,          // !=
     TK_LE,          // <=
@@ -130,6 +131,7 @@ enum {
     ND_WHILE,       // while
     ND_DO_WHILE,    // do ~ while
     ND_FOR,         // for
+    ND_BREAK,       // break
     ND_DEREF,       // Pointer dereference : *
     ND_ADDR,        // Address-of operater : &
     ND_DOT,         // Struct member access
